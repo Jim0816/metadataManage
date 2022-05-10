@@ -1,0 +1,177 @@
+接口定义配置
+
+eg:
+user:id,dept_id,name,age,sex,phone
+dept:id,dept_name,address
+
+操作符号 in、not in    （后期优化，自定义操作符）
+
+url格式: http://ip+port/api-server(动态服务接口)/model/opType/name?id=接口对象的ID
+
+================================ 1.添加类型接口 ====================================
+{
+	"name": "addUser", // 不允许重复
+	"remark": "这个接口是用来添加新用户",
+	"httpType": "post", //post、get （暂时只考虑post请求）
+	"opType": "put", //接口数据操作类型 put post delete get
+	"model": "user", // 操作的集合名称
+	"modelNames": "user,dept", // 接口涉及到的模型名称
+	"params": {
+	    "user": {"type": "model", "id": 10000}
+	}, // body中提交的数据： id为模型user的ID，找到本模型的字段树
+	"filter": "#{user.dept_id} in dept.id", //满足这个条件才允许插入 (主外键关系检查)
+	"status": 1, //接口状态：1正在使用 0禁用
+	"createUser": 100000, // 接口创建用户ID (本接口只允许自己修改)
+	"accessUser": [100000,100001,200005] //允许使用本接口的用户ID （本接口允许这些人访问,自己默认加入列表）
+}
+
+接口创建：
+假设以上配置通过ApiController中save接口存储成功，则回返回前端：
+url: http://127.0.0.1:8081/api-server/user/put/addUser?id=1009   (id是mysql中表api的主键)
+
+接口调用：
+调用接口时，需要传递的数据:
+http请求的url + body（如下）
+
+
+
+================================ 2.修改类型接口 ====================================
+{
+	"name": "updateUser", // 不允许重复
+    "remark": "这个接口是用来修改用户",
+	"httpType": "post", //post、get （暂时只考虑post请求）
+	"opType": "post", //接口数据操作类型 put post delete get
+	"model": "user", // 操作的集合名称
+	"modelNames": "user,dept", // 接口涉及到的所有模型名称
+	"params": {
+        "user": {"type": "model", "id": 10000}
+    }, // body中提交的数据： id为模型user的ID，找到本模型的字段树
+    "filter": "#{user.dept_id} in dept.id", //满足这个条件才允许修改(主外键关系检查)
+	"status": 1, //接口状态：1正在使用 0禁用
+	"createUser": 100000, // 接口创建用户ID (本接口只允许自己修改)
+	"accessUser": [100000,100001,200005] //允许使用本接口的用户ID （本接口允许这些人访问,自己默认加入列表）
+}
+
+接口创建：
+假设以上配置通过ApiController中save接口存储成功，则回返回前端：
+url: http://127.0.0.1:8081/api-server/user/post/updateUser?id=1004   (id是mysql中表api的主键)
+
+接口调用：
+调用接口时，需要传递的数据:
+http请求的url + body（如下）
+{
+    "user": {
+        "id": 10001,
+        "dept_id": 10000,
+        "name": "jim-update",
+        "age": 29,
+        "sex": 0,
+        "phone": "13070349803",
+        "address": {
+            "province": "xxx",
+            "city": "xxxx"
+        }
+    }
+}
+
+================================ 3.删除类型接口 ====================================
+{
+	"name": "deleteDept", // 不允许重复
+    "remark": "这个接口是用来删除部门",
+	"httpType": "post", //post、get （暂时只考虑post请求）
+	"opType": "delete", //接口数据操作类型 put post delete get
+	"model": "dept", // 操作的集合名称
+	"modelNames": "user,dept", // 接口涉及到的模型名称
+	"params": {
+	    "id": {"type": "field", "id": 10004}
+	}, // body中提交的数据： dept实体的id
+	"filter": "dept.id = #{id} and #{id} not in user.dept_id", //满足这个条件才允许删除 (主外键关系检查)
+	"status": 1, //接口状态：1正在使用 0禁用
+	"createUser": 100000, // 接口创建用户ID (本接口只允许自己修改)
+	"accessUser": [100000,100001,200005] //允许使用本接口的用户ID （本接口允许这些人访问,自己默认加入列表）
+}
+
+接口创建：
+假设以上配置通过ApiController中save接口存储成功，则回返回前端：
+url: http://127.0.0.1:8081/api-server/dept/delete/deleteDept?id=1007   (id是mysql中表api的主键)
+
+接口调用：
+调用接口时，需要传递的数据:
+http请求的url + body（如下）
+{
+    "id": 100001
+}
+
+
+
+================================ 4.查询类型接口 ====================================
+{
+	"name": "getUserPageByDeptName", // 不允许重复
+    "remark": "这个接口用来查询用户，按照部门名称查询,查询部门下所有用户,分页查询，并且按照id升序age降序",
+	"httpType": "post", //post、get （暂时只考虑post请求）
+	"opType": "get", //接口数据操作类型 put post delete get
+	"modelNames": "user,dept", // 接口涉及到的模型名称
+    "params": {
+        "deptName": {"type": "field", "id": 10009},
+        "pageSize": {"type": "field", "id": 10011},
+        "pageNow": {"type": "field", "id": 10019}
+    },
+    "filter": "dept.name = #{deptName} and dept.id = user.dept_id", // 查询条件
+    "page": {"pageSize": #{pageSize}, "pageNow": #{pageNow}}, // 分页设置
+    "sort": "id:1, age:-1", //按照ID升序排序
+    "return": "*", // 返回字段
+	"status": 1, //接口状态：1正在使用 0禁用
+	"createUser": 100000, // 接口创建用户ID (本接口只允许自己修改)
+	"accessUser": [100000,100001,200005] //允许使用本接口的用户ID （本接口允许这些人访问,自己默认加入列表）
+}
+
+
+接口创建：
+假设以上配置通过ApiController中save接口存储成功，则回返回前端：
+url: http://127.0.0.1:8081/api-server/user/get/getUserPageByDeptName?id=10010   (id是mysql中表api的主键)
+
+接口调用：
+调用接口时，需要传递的数据:
+http请求的url + body（如下）
+{
+    "deptName": "计算中心",
+    "pageSize": 10,
+    "pageNow": 1
+}
+
+
+
+
+================================= 关于condition条件提取的方法 =====================================
+
+提取where条件
+(user.dept_id = dept.id and user.age > 20)or user.name = "ljm" or (user.name = "zhangsan" and age > 30)
+
+1.先扫描and or 出现的位置
+
+
+2.再扫描出括号所在范围
+
+3.找出括号外的and or 所在位置
+
+4.按照and or的位置将where语句拆分为各个condition单元
+
+------- or
+   ---- and
+     -- user.dept_id = dept.id
+     -- user.age > 20
+   ---- user.name = "ljm"
+   ---- and
+     -- user.name = "zhangsan"
+     -- age > 30
+
+
+case 1: user.dept_id = dept.id and user.age > 20  Y
+case 2: (user.dept_id = dept.id and user.age > 20) or user.name = "ljm" or (user.name = "zhangsan" and age > 30) N
+case 3: user.dept_id = dept.id or user.age > 20 and user.name = "ljm"  Y
+
+-------or
+    ---user.dept_id = dept.id
+    ---user.age > 20
+-------and
+    ---user.name = "ljm"

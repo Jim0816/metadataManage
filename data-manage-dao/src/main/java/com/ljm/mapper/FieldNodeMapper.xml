@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ljm.mapper.FieldNodeMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.ljm.entity.FieldNode">
+        <id column="id" property="id" />
+        <result column="parent_id" property="parentId" />
+        <result column="field_info_id" property="fieldInfoId" />
+        <result column="default_name" property="defaultName" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, parent_id, field_info_id, default_name
+    </sql>
+
+    <!--<select id="getRoot" resultType="FieldNodeVO" parameterType="fieldTreeVO">
+        SELECT * FROM tb_field_node WHERE id=#{fieldTreeVO.KEY_ID}
+    </select>
+
+    <select id="getFieldTreeChildren" resultType="FieldNodeVO" parameterType="fieldTreeVO">
+        SELECT * FROM tb_field_node WHERE parent_id=#{fieldTreeVO.KEY_ID}
+    </select>-->
+
+
+
+</mapper>

@@ -1,0 +1,22 @@
+# 忽略.idea
+.idea
+
+# 忽略target
+*/target
+
+# 忽略日志文件
+*.log
+
+# 忽略out
+out
+
+# 忽略gz文件
+*.gz
+
+#忽略前端代码中的依赖
+vue-code/vueadmin-vue/node_modules
+vue-code/vueadmin-vue/.idea
+
+# 忽略iml文件
+*.iml
+

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ljm.mapper.FieldInfoMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.ljm.entity.FieldInfo">
+        <id column="id" property="id" />
+        <result column="field_name" property="fieldName" />
+        <result column="field_type" property="fieldType" />
+        <result column="length" property="length" />
+        <result column="is_require" property="isRequire" />
+        <result column="is_unique" property="isUnique" />
+        <result column="default_value" property="defaultValue" />
+        <result column="remark" property="remark" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, field_name, field_type, length, is_require, is_unique, default_value, remark
+    </sql>
+
+    <select id="getFieldList" resultType="FieldInfo">
+        SELECT * FROM tb_field_info
+    </select>
+
+    <select id="getField" resultType="FieldInfo" parameterType="fieldInfo">
+        SELECT * FROM tb_field_info WHERE id=#{fieldInfo.KEY_ID}
+    </select>
+
+<!--     自定义sql语句，实现多条件查询-->
+    <select id="getFieldInfoList" resultType="com.ljm.entity.FieldInfo">
+        SELECT * FROM tb_field_info
+        <where>
+            1 = 1
+            <if test="fieldInfo.id != null">
+                and id = #{fieldInfo.id}
+            </if>
+            <if test="fieldInfo.fieldName != null">
+                and field_name like  "%"#{fieldInfo.fieldName}"%"
+            </if>
+            <if test="fieldInfo.fieldType != null and fieldInfo.fieldType.length >0 ">
+                and field_type = #{fieldInfo.fieldType}
+            </if>
+            <if test="fieldInfo.length != null">
+                and length = #{fieldInfo.length}
+            </if>
+            <if test="fieldInfo.isRequire != null">
+                and is_require =  #{fieldInfo.isRequire}
+            </if>
+            <if test="fieldInfo.isUnique != null">
+                and is_unique =  #{fieldInfo.isUnique}
+            </if>
+            <if test="fieldInfo.defaultValue != null">
+                and default_value =  #{fieldInfo.defaultValue}
+            </if>
+            <if test="fieldInfo.remark != null">
+                and remark like  "%"#{fieldInfo.remark}"%"
+            </if>
+        </where>
+    </select>
+
+</mapper>

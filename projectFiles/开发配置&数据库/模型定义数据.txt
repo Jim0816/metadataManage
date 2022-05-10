@@ -1,0 +1,254 @@
+模型定义过程:
+先定义字段，再定义字段树，最后定义模型
+
+
+===============1. 定义字段=============
+
+字段类型有： string,int,long,float,double,date,datetime,array(每个元素都是string)
+{
+	"fieldName": "name",
+	"fieldType": "string",
+	"length": 20,
+	"isRequire": 0,
+	"isUnique": 0,
+	"defaultValue": "",
+	"remark": "名称"
+}
+
+{
+	"fieldName": "sex",
+	"fieldType": "string",
+	"length": 2,
+	"isRequire": 0,
+	"isUnique": 0,
+	"defaultValue": "男",
+	"remark": "性别"
+}
+
+{
+	"fieldName": "age",
+	"fieldType": "int",
+	"length": 2,
+	"isRequire": 0,
+	"isUnique": 0,
+	"defaultValue": "",
+	"remark": "年龄"
+}
+
+{
+	"fieldName": "province",
+	"fieldType": "string",
+	"length": 10,
+	"isRequire": 0,
+	"isUnique": 0,
+	"defaultValue": "",
+	"remark": "省份"
+}
+
+{
+	"fieldName": "city",
+	"fieldType": "string",
+	"length": 10,
+	"isRequire": 0,
+	"isUnique": 0,
+	"defaultValue": "",
+	"remark": "市区"
+}
+
+
+============2. 定义字段树 ==============
+
+*****注意*****  这个id只是前端为了组织结构的ID，存入数据库需要生成自己新的ID
+[
+	{"id": 1, "nodeType": 1, "parentId": -1, "fieldInfoId":-1, "defaultName": "root"},
+	{"id": 2, "nodeType": 3, "parentId": 1, "fieldInfoId": 2, "defaultName": ""},
+	{"id": 3, "nodeType": 3, "parentId": 1, "fieldInfoId": 6, "defaultName": ""},
+	{"id": 4, "nodeType": 3, "parentId": 1, "fieldInfoId": 7, "defaultName": ""},
+	{"id": 5, "nodeType": 2, "parentId": 1, "fieldInfoId": -1, "defaultName": "address"},
+	{"id": 6, "nodeType": 3, "parentId": 5, "fieldInfoId": 8, "defaultName": ""},
+	{"id": 7, "nodeType": 3, "parentId": 5, "fieldInfoId": 9, "defaultName": ""}
+]
+
+
+
+==================3. 定义模型 ================
+index类型:单索引、唯一索引、复合索引、hash索引
+index字段用先用string存储
+
+{
+	"modelName": "user",
+	"fieldTreeId": 5,
+	"index": [
+	    {"type": "unique_key", "field": "phone", "sort": -1},
+	    {"type": "hash_key", "field": "email", "sort": 1},
+	    {"type": "multi_key", "field": [{"field": "name", "sort": 1},{"field": "age", "sort": -1}]}
+	],
+	"parentModelId": 7, //用户前端效果：本模型继承7号模型，但是实际上复制7号模型的字段树，用于创建一份新的字段树，新字段树ID更新到本模型的fieldTreeId
+	"remark": "描述说明......"
+}
+
+1.创建模型过程 又继承
+①校验模型 是否重名、（fieldTreeId == null && parentModelId == null）     fieldTreeId、index、parentModelId都是前端获取的，不会存在错误，不需要校验
+②判断是否继承了父模型（即parentModelId），如果继承了就复制父模型字段树，创建新树，树的根节点ID赋值给fieldTreeId
+③如果没有继承父亲模型，则直接创建
+④创建成功后，创建mongodb集合、创建集合的索引
+⑤如果④创建成功，则完成模型的创建过程
+⑥如果④创建失败，则抛出异常导致事务失败
+
+
+2.修改模型
+修改模型：（id定位数据）修改项: modelName、fieldTreeId、index、parentModelId、remark
+注意：前端只要修改了fieldTreeId 或者 parentModelId   就会清空前端的index缓存   需要用户基于新的字段树选择索引
+①后端接收到更新后的模型对象
+②通过ID查询出旧模型数据
+③对比修改的项
+    a.对比modelName,如果不一致 -> 记录本项待修改
+    b.对比remark，如果不一致 -> 记录本项待修改
+    c.对比parentModelId、fieldTreeId
+        c1. 如果一致 -> 则继续下一步d
+        c2. 如果不一致 -> 判断mongo集合中是否存在数据：
+                如果存在数据，则拒绝修改，抛出异常，结束；
+                如果不存在数据，则记录字段树待修改，继续下一步
+    d.对比index是否一致，如果不一致，记录本项待修改
+
+④获取③中记录的所有修改项，更新mysql数据库中model的数据
+    如果成功，则更新mongo索引，索引如果更新失败，则抛出异常，事务失败
+    如果失败，则返回失败
+
+
+3.删除模型
+model表加一个is_delete字段  （晨洋：字段树是否被模型引用检查时，只检查逻辑存在的模型）
+①通过模型ID去逻辑删除model记录  相当于update is_delete = 1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=============================================以下信息作废，先留着后面看看能不能使用 =======================================================
+
+定义模型
+
+{
+	"modelName": "user",
+	"remark": "描述说明......",
+	"fields": [
+		{"id": 1, "nodeType": 1, "parentId": -1, "fieldInfoId":-1, "defaultName": "root"},
+		{
+			"id": 2,
+			"nodeType": 0,
+			"parentId": 1,
+			"fieldInfoId": -1,
+			"defaultName": "",
+			"fieldName": "name",
+			"fieldType": "string",
+			"length": 11,
+			"isRequire": 0,
+			"isUnique": 0,
+			"defaultValue": "",
+			"remark": "姓名"
+		},
+		{"id": 3, "nodeType": 2, "parentId": 1, "fieldInfoId": -1, "defaultName": "address"},
+		{
+			"id": 4,
+			"nodeType": 0,
+			"parentId": 3,
+			"fieldInfoId": -1,
+			"defaultName": "",
+			"fieldName": "province",
+			"fieldType": "string",
+			"length": 11,
+			"isRequire": 0,
+			"isUnique": 0,
+			"defaultValue": "",
+			"remark": "省份"
+		},
+		{
+			"id": 5,
+			"nodeType": 0,
+			"parentId": 3,
+			"fieldInfoId": -1,
+			"defaultName": "",
+			"fieldName": "city",
+			"fieldType": "string",
+			"length": 11,
+			"isRequire": 0,
+			"isUnique": 0,
+			"defaultValue": "",
+			"remark": "城市"
+		},
+		{
+			"id": 6,
+			"nodeType": 0,
+			"parentId": 1,
+			"fieldInfoId": -1,
+			"defaultName": "",
+			"fieldName": "phone",
+			"fieldType": "string",
+			"length": 11,
+			"isRequire": 0,
+			"isUnique": 0,
+			"defaultValue": "",
+			"remark": "联系电话"
+		}
+	],
+	"relations": [
+		{"type": 1, "modelId": 5, "fieldId": "6", "referedModelId": 5, "referedFieldId": "11"}
+	]
+}
+
+
+
+
+
+
+{
+	"modelName": "user",
+	"dbType": "mongo",
+	"remark": "描述说明......",
+	"fields": [
+		{"id": 1, "nodeType": 1, "parentId": -1, "fieldInfoId":-1, "defaultName": "root"},
+		{"id": 2, "nodeType": 3, "parentId": 1, "fieldInfoId": 2, "defaultName": ""},
+		{"id": 3, "nodeType": 3, "parentId": 1, "fieldInfoId": 6, "defaultName": ""},
+		{"id": 4, "nodeType": 3, "parentId": 1, "fieldInfoId": 7, "defaultName": ""},
+		{"id": 5, "nodeType": 2, "parentId": 1, "fieldInfoId": -1, "defaultName": "address"},
+		{"id": 6, "nodeType": 3, "parentId": 5, "fieldInfoId": 8, "defaultName": ""},
+		{"id": 7, "nodeType": 3, "parentId": 5, "fieldInfoId": 9, "defaultName": ""},
+		{
+			"id": 8,
+			"nodeType": 0,
+			"parentId": 1,
+			"fieldInfoId": -1,
+			"defaultName": "",
+			"fieldName": "phone",
+			"fieldType": "string",
+			"length": 11,
+			"isRequire": 0,
+			"isUnique": 0,
+			"defaultValue": "",
+			"remark": "联系电话"
+		}
+	],
+	"relations": [
+		{"relationType": 1, "otherModelId": 5}
+	]
+}

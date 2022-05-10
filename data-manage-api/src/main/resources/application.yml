@@ -1,0 +1,43 @@
+server:
+  port: 8081
+
+spring:
+  #数据源系统配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://152.136.246.201:3307/heps_data_manage?useUnicode=true&useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: root
+    password: zxc654321..
+  #配置业务数据源 (如果访问不了这个ip  大家可以自己本地安装一个MongoDB)
+  data:
+    mongodb:
+      #uri: mongodb://jim:164411@202.122.39.37:27017/jimTest
+      uri: mongodb://dataM:ZxC654321@152.136.246.201:27017/zytTest
+  #配置缓存
+  redis:
+    host: 152.136.246.201
+    port: 6379
+    database: 1
+    connect-timeout: 2000ms
+
+mybatis-plus:
+  mapper-locations: classpath:com/ljm/**/mapper/*Mapper.xml
+  #实体扫描，多个package用逗号或者分号分隔
+  typeAliasesPackage: com.ljm.entity
+
+markerhub:
+  jwt:
+    header: Authorization
+    expire: 604800 #7天，秒单位
+    secret: ji8n3439n439n43ld9ne9343fdfer49h
+
+logging:
+  file:
+    path: /opt/log #日志文件名称
+    name: data-manage.log
+  level:
+    root: info #日志级别 root表示所有包，也可以单独配置具体包 fatal error warn info debug trace off
+
+# 用户自定义配置
+custom:
+  apiUrlPattern: "http://127.0.0.1:8081/server/{opType}/{model}/{name}"

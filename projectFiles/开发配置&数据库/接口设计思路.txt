@@ -1,0 +1,107 @@
+用户面向数据模型进行接口配置：
+
+数据模型的操作基于数据流思想，支持的数据流操作类型如下：
+1.过滤操作 match
+2.排序操作 sort
+3.关联操作 lookup
+4.分组操作 group
+5.提取字段操作 project
+6.开窗操作 unwind
+7.分页操作 skip + limit
+
+8.自定义操作 custom （新需求）
+备注：1-7步都是基于mongo聚合查询，底层会按照链路拼接出查询语法 而步骤8属于用户业务层面操作，基于内存对数据进行操作，必须处于1-7步骤之后进行
+
+部门集合
+[
+    {"_id", 1000, "dept_name": "人事部", "address": "xxxxxx00"}
+    {"_id", 1001, "dept_name": "技术部", "address": "xxxxxx01"}
+    {"_id", 1002, "dept_name": "财务部", "address": "xxxxxx02"}
+]
+
+员工集合
+[
+    {"_id", 3000, "dept_id": 1002, staff_name": "李四", "address": "xxxxxx00"}
+    {"_id", 3001, "dept_id": 1001, "staff_name": "张三", "address": "xxxxxx01"}
+    {"_id", 3002, "dept_id": 1002, "staff_name": "王五", "address": "xxxxxx02"}
+]
+
+====================== case1: 查询财务部所有员工信息 =========================
+①初始化查询 查询部门表
+[
+    {"_id", 1000, "dept_name": "人事部", "address": "xxxxxx00"}
+    {"_id", 1001, "dept_name": "技术部", "address": "xxxxxx01"}
+    {"_id", 1002, "dept_name": "财务部", "address": "xxxxxx02"}
+]
+
+②过滤操作 match: dept_name = "财务部"
+[
+    {"_id", 1002, "dept_name": "财务部", "address": "xxxxxx02"}
+]
+③关联操作 lookup: 关联用户集合、关联字段：dept._id = user.dept_id、新字段集别名users
+[
+    {
+        "_id", 1002,
+        "dept_name": "财务部",
+        "address": "xxxxxx02"},
+        "users": [
+            {"_id", 3000, "dept_id": 1002, staff_name": "李四", "address": "xxxxxx00"}
+            {"_id", 3002, "dept_id": 1002, "staff_name": "王五", "address": "xxxxxx02"}
+        ]
+]
+④开窗操作 unwind: 对字段users进行开窗
+[
+    {
+        "_id", 1002,
+        "dept_name": "财务部",
+        "address": "xxxxxx02"},
+        "users": {"_id", 3000, "dept_id": 1002, staff_name": "李四", "address": "xxxxxx00"}
+    },
+    {
+        "_id", 1002,
+        "dept_name": "财务部",
+        "address": "xxxxxx02"},
+        "users": {"_id", 3002, "dept_id": 1002, "staff_name": "王五", "address": "xxxxxx02"}
+    }
+]
+⑤提取字段操作 project: ”_id,dept_name,users as user“
+[
+    {
+        "_id", 1002,
+        "dept_name": "财务部",
+        "user": {"_id", 3000, "dept_id": 1002, staff_name": "李四", "address": "xxxxxx00"}
+    },
+    {
+        "_id", 1002,
+        "dept_name": "财务部",
+        "user": {"_id", 3002, "dept_id": 1002, "staff_name": "王五", "address": "xxxxxx02"}
+    }
+]
+⑥排序操作 sort: 按照user._id降序
+[
+    {
+        "_id", 1002,
+        "dept_name": "财务部",
+        "user": {"_id", 3002, "dept_id": 1002, "staff_name": "王五", "address": "xxxxxx02"}
+    },
+    {
+        "_id", 1002,
+        "dept_name": "财务部",
+        "user": {"_id", 3000, "dept_id": 1002, staff_name": "李四", "address": "xxxxxx00"}
+    }
+]
+
+⑦分页操作 查询第2页，页面大小为1
+方法一（不能确定第一条数据时使用，全表查询，性能低）:
+跳过第1页，查出第2页
+skip: 1, limit: 1
+
+方法二（确定第一条数据时使用，性能高）:
+find({'_id' :{ "$gt" : 1002}).limit(1)
+[
+    {
+        "_id", 1002,
+        "dept_name": "财务部",
+        "user": {"_id", 3000, "dept_id": 1002, staff_name": "李四", "address": "xxxxxx00"}
+    }
+]

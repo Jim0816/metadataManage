@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ljm.mapper.ModelMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.ljm.entity.Model">
+        <id column="id" property="id" />
+        <result column="model_name" property="modelName" />
+        <result column="field_tree_id" property="fieldTreeId" />
+        <result column="parent_model_id" property="parentModelId" />
+        <result column="index" property="index" />
+        <result column="remark" property="remark" />
+        <result column="is_delete" property="isDelete" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, model_name, field_tree_id, parent_model_id, index, remark ,is_delete
+    </sql>
+
+    <!-- 查询模型列表 自定义sql语句实现多条件联合查询-->
+    <select id="listModelDetailList" resultType="com.ljm.entity.Model" >
+        SELECT * FROM tb_model
+        <where>
+            1 = 1
+            <if test="model.id != null">
+                and id = #{model.id}
+            </if>
+            <if test="model.modelName != null">
+                and model_name like  "%"#{model.modelName}"%"
+
+            </if>
+            <!--<if test="model.dbType != null and model.dbType.length >0 ">-->
+                <!--and db_type = #{model.dbType}-->
+            <!--</if>-->
+            <!--<if test="model.fieldNodeId != null">-->
+                <!--and field_node_id = #{model.fieldNodeId}-->
+            <!--</if>-->
+            <if test="model.remark != null">
+                and remark like  "%"#{model.remark}"%"
+            </if>
+        </where>
+    </select>
+
+
+    <!-- 多条件查询 -->
+    <select id="listModel" resultType="com.ljm.entity.Model" parameterType="com.ljm.entity.Model">
+        SELECT * FROM tb_model
+        <where>
+            1 = 1
+            <if test="model.id != null">
+                and id = #{model.id}
+            </if>
+            <if test="model.modelName != null and model.modelName.length > 0">
+                and model_name like  "%"#{model.modelName}"%"
+            </if>
+            <if test="model.fieldTreeId != null">
+                and field_tree_id = #{model.fieldTreeId}
+            </if>
+            <if test="model.parentModelId != null">
+                and parent_model_id = #{model.parentModelId}
+            </if>
+            <if test="model.index != null and model.index.length > 0">
+                and 'index' = #{model.index}
+            </if>
+            <if test="model.remark != null and model.remark.length > 0" >
+                and remark like "%"#{model.remark}"%"
+            </if>
+            <if test="model.isDelete != null">
+                and is_delete = #{model.isDelete}
+            </if>
+
+        </where>
+
+    </select>
+</mapper>
