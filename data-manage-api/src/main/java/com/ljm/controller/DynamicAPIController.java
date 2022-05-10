@@ -1,18 +1,14 @@
 package com.ljm.controller;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.ljm.api.invoke.check.CheckParams;
+import com.ljm.api.invoke.parse.APIParser;
 import com.ljm.bo.ApiResult;
-import com.ljm.entity.Api;
-import com.ljm.enums.ResCodeEnum;
-import com.ljm.lang.Const;
 import com.ljm.service.ApiService;
 import com.ljm.service.DynamicApiService;
 import com.ljm.vo.Result;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -29,6 +25,7 @@ public class DynamicAPIController extends BaseController{
 
     private DynamicApiService dynamicApiService;
     private ApiService apiService;
+    private APIParser apiParser;
     /**
      * @description 处理put类型接口  apiName是接口名称（唯一），通过接口名称查找接口数据
      * @return
@@ -38,38 +35,21 @@ public class DynamicAPIController extends BaseController{
      **/
     @PostMapping(value = "/put/{model}/{apiName}")
     public Result add(@RequestBody String data, @PathVariable("apiName") String apiName){
+        // 接口请求参数
         JSONObject acceptData = JSONObject.parseObject(data);
-        QueryWrapper<Api> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("name",apiName);
-        Api api = apiService.getOne(queryWrapper);
-        String key = api.getModel() + ":" + api.getName();
-        Object object = redisUtil.hget(Const.API_KEY, key);
-        ApiResult apiResult = JSON.parseObject(object.toString(), ApiResult.class);
+        // 1.解析接口
+        // TODO 缓存优化 从缓存获取 (暂时直接解析)
+        //String key = api.getModel() + ":" + api.getName();
+        //Object object = redisUtil.hget(Const.API_KEY, key);
+        //ApiResult apiResult = JSON.parseObject(object.toString(), ApiResult.class);
         // 1.解析API结果 （可以从缓存获取）
         //ApiResult apiResult = dynamicApiService.parseApi(api);
+        ApiResult apiResult = apiParser.parse(apiName);
 
-        // 2.数据校验 zrj + hwl
-        //boolean checkResult = dynamicApiService.checkApiData(acceptData, apiResult.getParams());
-        /*if (!checkResult){
-            // 校验失败
-            return Result.failed(ResCodeEnum.API_DATA_IS_NOT_VALID);
-        }*/
+        // 2.参数校验 acceptData校验过程会被处理
+        CheckParams.checkParams(apiResult.getParams(), acceptData);
 
-        // 3.注入：data + apiResult => mongo执行对象  zyt + ljm
-        // 此时，接口校验通过，并且acceptData在校验过程中可能预处理了
-
-        // http://127.0.0.1:8081/server/user/put/addUser
-       /* System.out.println(acceptData);
-        System.out.println(acceptData.values());
-        //获取json数据信息
-        for (Object o : acceptData.keySet()){
-            System.out.println(o +"==="+acceptData.get(o));
-            JSONObject jsonObject= (JSONObject) acceptData.get(o);
-            for (Object t : jsonObject.keySet()){
-                System.out.println(t+"+++++++"+jsonObject.get(t));
-            }
-        }
-        */
+        // 3.封装执行
         return Result.ok();
     }
 

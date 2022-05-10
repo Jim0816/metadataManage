@@ -53,7 +53,7 @@ public class MongoHelper {
      **/
     private boolean judgeCondition(ConditionNode conditionNode,JSONObject data){
         // 获取当前结点
-        Condition condition = conditionNode.getCondition();
+        //Condition condition = conditionNode.getCondition();
         // 获取孩子结点
         List<ConditionNode> children = conditionNode.getChildren();
         // 孩子为空
@@ -61,7 +61,8 @@ public class MongoHelper {
             return false;
         }
         // 判断当前结点类型
-        Integer type = condition.getType();
+        //Integer type = condition.getType();
+        Integer type = 0;
         if(type == ConditionNode.ROOT_NODE){
             // 遍历孩子结点
             for(ConditionNode rootChild : children){
@@ -88,8 +89,8 @@ public class MongoHelper {
             return or;
         }else{
             //解析value_node结点,获取运算条件字符串
-            String value = condition.getValue();
-            LinkedHashMap<String, String[]> operatorMap = parseString(value);
+            //String value = condition.getValue();
+            LinkedHashMap<String, String[]> operatorMap = parseString("value");
 
             QueryModel queryModel = new QueryModel("", "*", 1, 10);
             List<FilterModel> list = new ArrayList();

@@ -1,6 +1,6 @@
 package com.ljm.api.invoke.check;
 
-import com.ljm.bo.CheckResult;
+import com.alibaba.fastjson.JSONObject;
 import com.ljm.bo.ParamData;
 
 /**
@@ -17,7 +17,9 @@ public class CheckContext {
                 new FieldCheck() : new ModelCheck();
     }
 
-    public <T1, T2> CheckResult<T1> executeCheck(T1 data, ParamData<T2> param){
+    public boolean executeCheck(JSONObject data, ParamData param){
         return checkStrategy.check(data, param);
     }
+
+
 }

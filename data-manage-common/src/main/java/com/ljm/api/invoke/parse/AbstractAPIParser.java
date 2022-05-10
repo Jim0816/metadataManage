@@ -22,13 +22,13 @@ import java.util.Map;
 public abstract class AbstractAPIParser {
     /**
      * @description 获取接口实体对象
-     * @param id 接口ID
+     * @param apiName 接口名称，唯一
      * @return Api对象
      * @exception
      * @author Jim
      * @date 2022/4/23 15:12
      **/
-    abstract Api parseApi(Long id);
+    abstract Api parseApi(String apiName);
 
     /**
      * @description 获取接口中具备访问权限的用户列表
@@ -73,10 +73,10 @@ public abstract class AbstractAPIParser {
      * @author Jim
      * @date 2022/4/23 15:29
      **/
-    public final ApiResult parse(Long id){
+    public final ApiResult parse(String apiName){
         ApiResult apiResult = new ApiResult();
         Api api = null;
-        if ((api = parseApi(id)) == null)
+        if ((api = parseApi(apiName)) == null)
             throw new CustomException(ResCodeEnum.API_IS_NOT_EXIST);
         apiResult.setApi(api);
         apiResult.setAccessor(parseAccessUsers(api));

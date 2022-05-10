@@ -2,7 +2,6 @@ package com.ljm.api.invoke.check;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.ljm.bo.CheckResult;
 import com.ljm.bo.ParamData;
 import com.ljm.entity.FieldInfo;
 
@@ -16,12 +15,12 @@ import com.ljm.entity.FieldInfo;
 public class FieldCheck implements CheckStrategy {
 
     @Override
-    public <T1, T2> CheckResult<T1> check(T1 data, ParamData<T2> param) {
+    public boolean check(JSONObject data, ParamData param) {
         JSONObject checkData = JSON.parseObject(data.toString());
 
         //没有校验规则时直接返回true
         if (param == null) {
-            return new CheckResult<>(true, data);
+            return true;
         }
         // 参数名称
         String paramName = param.getParamName();
@@ -32,20 +31,20 @@ public class FieldCheck implements CheckStrategy {
             //当前参数没有传递数据 TODO 后期判断参数是否必填
             //存在默认值或者为非必填项返回true
             if (paramType.getIsRequire() != 1 || paramType.getDefaultValue() != null) {
-                return new CheckResult<>(true, data);
+                return true;
             }
-            return new CheckResult<>(false, data);
+            return false;
         }
         Object dataValue = checkData.get(paramName);
         //校验数据类型
         if (!judgeDataTypeIsValid(paramType.getFieldType(), dataValue)) {
-            return new CheckResult<>(false, data);
+            return false;
         }
         //校验数据长度
         if (paramType.getLength() < dataValue.toString().length()) {
-            return new CheckResult<>(false, data);
+            return false;
         }
-        return new CheckResult<>(true, data);
+        return true;
     }
 
     /**

@@ -8,6 +8,7 @@ import com.ljm.entity.Api;
 import com.ljm.entity.SysUser;
 import com.ljm.service.ApiService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
@@ -18,13 +19,14 @@ import java.util.Map;
  * @Author Jim
  * @Date 2022/4/23 15:39
  **/
+@Component
 public class APIParser extends AbstractAPIParser {
     @Autowired
     private ApiService apiService;
 
     @Override
-    Api parseApi(Long id) {
-        return apiService.getOne(new QueryWrapper<Api>().eq("id", id));
+    Api parseApi(String apiName) {
+        return apiService.getOne(new QueryWrapper<Api>().eq("name", apiName));
     }
 
     @Override
