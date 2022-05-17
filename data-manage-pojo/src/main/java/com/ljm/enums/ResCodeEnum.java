@@ -28,6 +28,7 @@ public enum ResCodeEnum {
     API_NAME_IS_EXIST(500300, "接口名称已存在"),
     API_DATA_IS_NOT_VALID(500301, "接口参数不合法"),
     API_IS_NOT_EXIST(500302, "接口不存在"),
+    API_IS_ILLEGAL(500303, "接口不合法，校验不通过"),
 
     //模型模块 5004xx zyt 50040x 模型创建 50041x 模型
     MODEL_CREATE_SUCCESS(500400, "模型创建成功"),

@@ -25,5 +25,5 @@ public interface SysUserService extends IService<SysUser> {
 	 * @author gcy
 	 * @date 2022/4/10 13:04
 	 **/
-	List<SysUser> getUserList(Long[] ids);
+	List<SysUser> getUserList(String[] ids);
 }

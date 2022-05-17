@@ -58,12 +58,12 @@ public class ApiController extends BaseController {
         // 2.若不存在，则添加
         if (apiService.save(api)){
             // 添加成功，则解析接口加入缓存
-            String key = api.getModel() + ":" + api.getName();
-            ApiResult apiResult = dynamicApiService.parseApi(api);
+            //String key = api.getModel() + ":" + api.getName();
+            //ApiResult apiResult = dynamicApiService.parseApi(api);
             //APIParser apiParser = new APIParser();
             //ApiResult apiResult = apiParser.parse(api.getId());
-            String value = JSON.toJSONString(apiResult);
-            redisUtil.hset(Const.API_KEY, key, value, 6 * 60); //6小时过期
+            //String value = JSON.toJSONString(apiResult);
+            //redisUtil.hset(Const.API_KEY, key, value, 6 * 60); //6小时过期
             return Result.ok();
         }
         return Result.failed();

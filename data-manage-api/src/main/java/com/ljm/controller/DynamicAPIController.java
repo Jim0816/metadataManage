@@ -28,7 +28,7 @@ public class DynamicAPIController extends BaseController{
     private APIParser apiParser;
     /**
      * @description 处理put类型接口  apiName是接口名称（唯一），通过接口名称查找接口数据
-     * @return
+     * @return http://127.0.0.1:8081/server/put/user/addUser
      * @exception
      * @author Jim
      * @date 2022/2/25 11:21
@@ -50,6 +50,9 @@ public class DynamicAPIController extends BaseController{
         CheckParams.checkParams(apiResult.getParams(), acceptData);
 
         // 3.封装执行
+        // data + api -> mongo
+
+
         return Result.ok();
     }
 

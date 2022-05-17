@@ -42,106 +42,6 @@ public class DynamicApiServiceImpl implements DynamicApiService {
     private FieldInfoService fieldInfoService;
 
 
-
-
-
-    /**
-     * @description TODO 动态分析api，并将api封装成ApiResult返回
-     * @return  封装成ApiResult
-     * @exception
-     * @author Gcy
-     * @date 2022/4/13 16:56
-     **/
-    @Override
-    public ApiResult parseApi(Api api) {
-          if (redisUtil.hasKey(api.getName())){
-            /*String apiString = (String) redisUtil.get(api.getName());
-            ApiResult apiResult = JSONObject.parseObject(apiString,ApiResult.class);
-            return JSON.parseObject(apiString,ApiResult.class) ;*/
-        }
-        QueryWrapper<Api> queryWrapper = new QueryWrapper<>();
-        Api dbApi = apiMapper.selectOne(queryWrapper.eq("id", api.getId()));
-        if (dbApi == null){
-            return null;
-        }
-
-        //开始解析Api对象 获取ApiResult
-        ApiResult apiResult = new ApiResult();
-
-        // 装入API基本信息
-        apiResult.setApi(dbApi);
-
-        // 装入API的可访问用户列表
-        apiResult.setAccessor(getApiWithAccessor(dbApi.getAccessUser()));
-
-        // 装入本接口涉及到的所有模型详细信息
-        apiResult.setModels(getApiWithModels(dbApi.getModelNames()));
-
-
-        // 装入所有模型之间的关联信息 TODO 暂时预留，后面考虑
-        //apiResult.setRelations(null);
-        //ConditionNode conditionNode = new ConditionNode(ConditionNode.ROOT_NODE,dbApi.getFilter());
-        //ConditionNode conditionNodeTree = ConditionParserUtil.buildConditionNode(conditionNode,dbApi.getFilter());
-        //将conditionNodes插入表tb_condition
-        //creatConditionTree(conditionNodeTree,-1);
-        // 装入接口查询数据条件
-        //apiResult.setConditionNode(conditionNodeTree);
-        // 键可以这样 api:user:addUser 存储到redis key(api.getName()) : hash(dbApi.toString(),sysUserList)
-        //redisUtil.hset(dbApi.getName(),dbApi.toString(),sysUserList);
-
-        // 键可以这样 apiName:apiResult 存储到redis
-
-        /*redisUtil.set(dbApi.getName(),SerializeUtil.serialize(apiResult));
-        System.out.println(redisUtil.get(dbApi.getName()));
-        ApiResult apiResult1 = (ApiResult) SerializeUtil.deserialize((byte[]) redisUtil.get(dbApi.getName()));
-        System.out.println("==="+apiResult1);*/
-        return apiResult;
-    }
-
-    /**
-     * @description TODO 获取本API解析规则
-     * @return List<ParamData>
-     * @exception
-     * @author Gcy
-     * @date 2022/4/21 19:08
-     **/
-    private List<ParamData> getApiWithParamData(String data) {
-        List<ParamData> dataList = new LinkedList<>();
-
-        //将data转为JSON
-        JSONObject jsonData = JSON.parseObject(data);
-
-        //遍历JSON获取信息
-        for (Object o : jsonData.keySet()){
-            ParamData paramData = new ParamData();
-            paramData.setParamName(String.valueOf(o));
-            JSONObject jsonObject= (JSONObject) jsonData.get(o);
-            for (Object t : jsonObject.keySet()){
-
-                if (String.valueOf(t).equals("type")){
-                    paramData.setType(String.valueOf(jsonObject.get(t)));
-                }
-                if (String.valueOf(t).equals("id")){
-                    if (paramData.getType() == null){
-                        for (Object a : jsonObject.keySet()){
-                            if (String.valueOf(a).equals("type")){
-                                paramData.setType(String.valueOf(jsonObject.get(a)));
-                            }
-                        }
-                    }
-                    if (paramData.getType().equals(ParamData.PARAM_FIELD_TYPE)){
-                        paramData.setValue(fieldInfoService.getById((Serializable) jsonObject.get(t)));
-                    }else if (paramData.getType().equals(ParamData.PARAM_MODEL_TYPE)){
-                        paramData.setValue( modelService.getModelDetail
-                                (modelService.getById((Serializable) jsonObject.get(t))));
-                    }
-                }
-            }
-            dataList.add(paramData);
-        }
-        return dataList;
-    }
-
     /**
      * @description TODO 获取拥有本API的用户列表
      * @return List<SysUser>
@@ -171,9 +71,7 @@ public class DynamicApiServiceImpl implements DynamicApiService {
     /**
      * 将bean存入Redis中
      */
-
-    @Override
-    public boolean checkApiData(JSONObject data, List<ParamData> rules) {
+    private boolean checkApiData(JSONObject data, List<ParamData> rules) {
         if (rules == null || rules.size() == 0){
             log.info("接口没有传参要求，不需要校验参数数据");
             return true;

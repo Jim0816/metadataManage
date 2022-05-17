@@ -35,5 +35,5 @@ public class ApiResult implements Serializable {
     private List<SysUser> accessor;
 
     // 接口参数列表
-    private Map<String,ParamData> params;
+    private Map<String, ParamData> params;
 }

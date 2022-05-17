@@ -16,4 +16,13 @@ public interface ApiService extends IService<Api> {
      * @date 2022/4/14 20:31
      **/
     List<Api> listApi(Api api);
+
+    /**
+     * @description 添加api
+     * @return
+     * @exception
+     * @author Jim
+     * @date 2022/5/16 20:07
+     **/
+    boolean save(Api api);
 }

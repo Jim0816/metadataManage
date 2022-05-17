@@ -14,6 +14,7 @@ import com.ljm.utils.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -102,7 +103,15 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	}
 
 	@Override
-	public List<SysUser> getUserList(Long[] ids) {
-		return null;
+	public List<SysUser> getUserList(String[] ids) {
+		if (ids == null){
+			return null;
+		}
+		List<SysUser> userList = new ArrayList<>();
+		for (String userId : ids){
+			SysUser sysUser = baseMapper.selectById(userId);
+			userList.add(sysUser);
+		}
+		return userList;
 	}
 }
