@@ -2,6 +2,7 @@ package com.ljm.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.ljm.api.invoke.check.CheckParams;
+import com.ljm.api.invoke.execute.ExecuteContext;
 import com.ljm.api.invoke.parse.APIParser;
 import com.ljm.bo.ApiResult;
 import com.ljm.service.ApiService;
@@ -42,15 +43,17 @@ public class DynamicAPIController extends BaseController{
         //String key = api.getModel() + ":" + api.getName();
         //Object object = redisUtil.hget(Const.API_KEY, key);
         //ApiResult apiResult = JSON.parseObject(object.toString(), ApiResult.class);
+
         // 1.解析API结果 （可以从缓存获取）
-        //ApiResult apiResult = dynamicApiService.parseApi(api);
         ApiResult apiResult = apiParser.parse(apiName);
 
         // 2.参数校验 acceptData校验过程会被处理
-        CheckParams.checkParams(apiResult.getParams(), acceptData);
+        //CheckParams.checkParams(apiResult.getParams(), acceptData);
 
         // 3.封装执行
         // data + api -> mongo
+        ExecuteContext executeContext = new ExecuteContext(apiResult);
+        int result = executeContext.execute(acceptData, apiResult);
 
 
         return Result.ok();

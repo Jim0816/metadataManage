@@ -24,9 +24,10 @@ public class CodeTest {
 
     @Test
     public void test() {
-        Scanner in = new Scanner(System.in);
-        String s = in.nextLine();
-        System.out.println(s);
+        String key = "#\\{dept_id\\}";
+        String a = "#{dept_id} in dept.id";
+        String b = a.replaceAll(key, "3");
+        System.out.println(b);
     }
 
 

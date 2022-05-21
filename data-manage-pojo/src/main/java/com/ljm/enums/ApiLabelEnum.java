@@ -7,7 +7,11 @@ package com.ljm.enums;
  * @Date 2022/4/9 21:42
  **/
 public enum ApiLabelEnum {
-    NAME("name");
+    NAME("name"),
+    API_TYPE_ADD("add"),
+    API_TYPE_UPDATE("update"),
+    API_TYPE_DELETE("delete"),
+    API_TYPE_GET("get");
 
     private final String value;
 
