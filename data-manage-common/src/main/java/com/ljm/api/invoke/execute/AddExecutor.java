@@ -6,6 +6,7 @@ import com.ljm.bo.ConditionNode;
 import com.ljm.utils.MongoDBUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
@@ -20,8 +21,12 @@ import java.util.Map;
  **/
 @Slf4j
 public class AddExecutor implements ExecuteStrategy{
-    @Autowired
+
     private MongoDBUtil mongoDBUtil;
+
+    public AddExecutor(MongoDBUtil mongoDBUtil){
+        this.mongoDBUtil = mongoDBUtil;
+    }
 
     @Override
     public Integer execute(JSONObject data, ApiResult apiResult) {
@@ -39,48 +44,6 @@ public class AddExecutor implements ExecuteStrategy{
         return 1;
     }
 
-    /**
-     * @description TODO 注入数据到 Condition
-     * @return
-     * @exception
-     * @author Jim
-     * @date 2022/5/21 13:49
-     **/
-    private void injectData(ConditionNode conditionNode, JSONObject data){
-        if (conditionNode.getNodeType() == ConditionNode.VALUE_NODE){
-            // 叶子节点 如 #{dept_id} in dept.id
-            replaceParamVar(conditionNode.getValue(), data);
-        }else {
-            List<ConditionNode> childes = conditionNode.getChildren();
-            for (ConditionNode child : childes){
-                injectData(child, data);
-            }
-        }
-    }
 
-    private String replaceParamVar(String conditionValue, JSONObject data){
-        Map<String, Object> map = new HashMap<>();
-        int start = -1;
-        for (int i = 0 ; i < conditionValue.length() ; i ++){
-            char c = conditionValue.charAt(i);
-            if ('#' == c){
-                start = i;
-            }else if('}' == c){
-                // 首部已经找到
-                if (start != -1){
-                    String key = conditionValue.substring(start, i + 1);
-                    String paramName = conditionValue.substring(key.indexOf('{') + 1, key.indexOf('}'));
-                    map.put(key, data.get(paramName));
-                    start = -1;
-                }
-            }
-        }
 
-        for (String key : map.keySet()){
-            String newKey = key.replace("{", "\\{")
-                    .replace("}", "\\}");
-            conditionValue = conditionValue.replaceAll(newKey, map.get(key).toString());
-        }
-        return conditionValue;
-    }
 }

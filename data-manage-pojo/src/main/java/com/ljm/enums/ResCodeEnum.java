@@ -43,7 +43,10 @@ public enum ResCodeEnum {
 
     //字段模块 5005xx
     FIELD_EXISTED_CREATE_ERROR(500500, "字段已经存在，不能重复创建"),
-    FIELD_EXISTED_UPDATE_ERROR(500501, "字段已经存在，拒绝修改");
+    FIELD_EXISTED_UPDATE_ERROR(500501, "字段已经存在，拒绝修改"),
+
+    // 封装执行mongodb模块 5006xx
+    CONDITION_ERROR(500600, "注入数据失败，条件不合法");
 
 
 

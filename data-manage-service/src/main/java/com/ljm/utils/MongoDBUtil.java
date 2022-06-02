@@ -376,7 +376,9 @@ public class MongoDBUtil {
         return result;
     }
 
-
+    public List<Map> query(Aggregation aggregation, String collName){
+        return mongoTemplate.aggregate(aggregation,collName,Map.class).getMappedResults();
+    }
 
     /**
      * @description TODO 关联查询

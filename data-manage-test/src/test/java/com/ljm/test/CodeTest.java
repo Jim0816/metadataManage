@@ -24,10 +24,9 @@ public class CodeTest {
 
     @Test
     public void test() {
-        String key = "#\\{dept_id\\}";
-        String a = "#{dept_id} in dept.id";
-        String b = a.replaceAll(key, "3");
-        System.out.println(b);
+        String a = "aabbbbccc";
+        int index = a.indexOf("bbbb");
+        System.out.println(index);
     }
 
 

@@ -121,6 +121,9 @@ public class APIParser extends AbstractAPIParser {
     @Override
     ConditionNode parseCondition(Api api) {
         String whereCondition = api.getFilter();
+        if (whereCondition == null){
+            return null;
+        }
         ConditionNode conditionNode = new ConditionNode(ConditionNode.ROOT_NODE,whereCondition);
         ConditionParserUtil.buildCondition(conditionNode,whereCondition);
         return conditionNode;

@@ -1,7 +1,6 @@
 package com.ljm.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.ljm.api.invoke.check.CheckParams;
 import com.ljm.api.invoke.execute.ExecuteContext;
 import com.ljm.api.invoke.parse.APIParser;
 import com.ljm.bo.ApiResult;
@@ -27,17 +26,20 @@ public class DynamicAPIController extends BaseController{
     private DynamicApiService dynamicApiService;
     private ApiService apiService;
     private APIParser apiParser;
+    private ExecuteContext executeContext;
+
     /**
-     * @description 处理put类型接口  apiName是接口名称（唯一），通过接口名称查找接口数据
+     * @description 处理add类型接口  apiName是接口名称（唯一），通过接口名称查找接口数据
      * @return http://127.0.0.1:8081/server/put/user/addUser
      * @exception
      * @author Jim
      * @date 2022/2/25 11:21
      **/
-    @PostMapping(value = "/put/{model}/{apiName}")
+    @PostMapping(value = "/add/{model}/{apiName}")
     public Result add(@RequestBody String data, @PathVariable("apiName") String apiName){
         // 接口请求参数
         JSONObject acceptData = JSONObject.parseObject(data);
+
         // 1.解析接口
         // TODO 缓存优化 从缓存获取 (暂时直接解析)
         //String key = api.getModel() + ":" + api.getName();
@@ -52,7 +54,7 @@ public class DynamicAPIController extends BaseController{
 
         // 3.封装执行
         // data + api -> mongo
-        ExecuteContext executeContext = new ExecuteContext(apiResult);
+        executeContext.setExecuteStrategy(apiResult);
         int result = executeContext.execute(acceptData, apiResult);
 
 
@@ -91,8 +93,22 @@ public class DynamicAPIController extends BaseController{
      * @date 2022/2/25 11:21
      **/
     @PostMapping(value = "/get/{model}/{apiName}")
-    public String get(@RequestBody String data, @PathVariable("apiName") String apiName){
-        return "";
+    public Result get(@RequestBody String data, @PathVariable("apiName") String apiName){
+        // 接口请求参数
+        JSONObject acceptData = JSONObject.parseObject(data);
+
+        // 1.解析API结果 （可以从缓存获取）
+        ApiResult apiResult = apiParser.parse(apiName);
+
+        // 2.参数校验 acceptData校验过程会被处理
+        //CheckParams.checkParams(apiResult.getParams(), acceptData);
+
+        // 3.封装执行
+        // data + api -> mongo
+        executeContext.setExecuteStrategy(apiResult);
+        int result = executeContext.execute(acceptData, apiResult);
+
+        return Result.ok();
     }
 
 }
