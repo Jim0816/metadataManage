@@ -5,9 +5,9 @@ spring:
   #数据源系统配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://152.136.246.201:3307/heps_data_manage?useUnicode=true&useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://101.43.173.159:3306/heps_data_manage?useUnicode=true&useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
     username: root
-    password: zxc654321..
+    password: 132556*QAZqaz
   #配置业务数据源 (如果访问不了这个ip  大家可以自己本地安装一个MongoDB)
   data:
     mongodb:
@@ -15,7 +15,7 @@ spring:
       uri: mongodb://dataM:ZxC654321@152.136.246.201:27017/zytTest
   #配置缓存
   redis:
-    host: 152.136.246.201
+    host: 101.43.173.159
     port: 6379
     database: 1
     connect-timeout: 2000ms

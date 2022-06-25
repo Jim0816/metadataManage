@@ -20,3 +20,5 @@ vue-code/vueadmin-vue/.idea
 # 忽略iml文件
 *.iml
 
+*/.DS_Store
+
