@@ -172,7 +172,7 @@ public class FieldNodeServiceImpl extends ServiceImpl<FieldNodeMapper, FieldNode
         getFieldTreeStruct(fields, childFields, fieldNodeTree);
 
         //2、判断字段树是否存在
-        judgeFieldTreeIsExist(fieldNodeTree);
+        //judgeFieldTreeIsExist(fieldNodeTree);
         //3存储字段树-1为根节点的父节点
         createFieldTree(fieldNodeTree, -1);
         return true;

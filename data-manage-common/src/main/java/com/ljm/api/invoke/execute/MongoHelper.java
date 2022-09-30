@@ -29,15 +29,16 @@ public class MongoHelper {
         // 判断是否多表联合查询 TODO
 
         // 过滤条件 TODO 存在bug
-        /*if (apiResult.getConditionNode() != null){
+        if (apiResult.getConditionNode() != null){
             ConditionNode conditionNode = apiResult.getConditionNode();
             Criteria rootCriteria = new Criteria();
-            getCriteria(apiResult, data, conditionNode, rootCriteria, -1);
+            getCriteria(apiResult, data, conditionNode, rootCriteria);
             operations.add(Aggregation.match(rootCriteria));
-        }*/
+        }
 
-        Criteria criteria = new Criteria().and("name").is("张三");
-        operations.add(Aggregation.match(criteria));
+        //Criteria criteria = new Criteria().and("name").is("张三");
+        //operations.add(Aggregation.match(criteria));
+
 
         // 排序 TODO
 
@@ -57,32 +58,38 @@ public class MongoHelper {
     private static void getCriteria(ApiResult apiResult,
                                     JSONObject data,
                                     ConditionNode conditionNode,
-                                    Criteria parentCriteria,
-                                    int parentType){
-        Criteria criteria = null;
-        if (parentType == ConditionNode.AND_NODE){
-            criteria = new Criteria();
-            parentCriteria.andOperator(criteria);
-        }else if (parentType == ConditionNode.OR_NODE){
-            criteria = new Criteria();
-            parentCriteria.orOperator(criteria);
-        }else{
-            // 当前节点是根节点
-            criteria = parentCriteria;
-        }
+                                    Criteria parentCriteria){
+        Criteria criteria = parentCriteria;
+        int parentType = conditionNode.getNodeType();
 
-
-        if (conditionNode.getNodeType() == ConditionNode.VALUE_NODE){
+        if (parentType == ConditionNode.VALUE_NODE){
             // 叶子节点 "name = #{name}"
             Condition condition = getCondition(conditionNode.getValue(), apiResult.getParams(), data);
             // 设置criteria
-            ConditionToCriteria(condition, criteria);
+            criteria.andOperator(ConditionToCriteria(condition));
         }else {
+            // 非叶子节点：根节点、and节点、or节点
+            if (parentType == ConditionNode.AND_NODE){
+                // and节点
+                criteria = new Criteria();
+                parentCriteria.andOperator(criteria);
+            }else if (parentType == ConditionNode.OR_NODE){
+                // or节点
+                criteria = new Criteria();
+                parentCriteria.orOperator(criteria);
+            }else if (parentType == ConditionNode.ROOT_NODE){
+                // root节点
+            }
+
             List<ConditionNode> childList = conditionNode.getChildren();
             for (ConditionNode child : childList){
-                getCriteria(apiResult, data, child, criteria, conditionNode.getNodeType());
+                getCriteria(apiResult, data, child, criteria);
             }
+
         }
+
+
+
     }
 
     /**
@@ -92,8 +99,8 @@ public class MongoHelper {
      * @author Jim
      * @date 2022/5/23 下午2:31
      **/
-    private static void ConditionToCriteria(Condition condition, Criteria criteria){
-        criteria = criteria.and(condition.getFieldName());
+    private static Criteria ConditionToCriteria(Condition condition){
+        Criteria criteria = new Criteria().and(condition.getFieldName());
         String opType = condition.getOperate();
         switch (opType){
             case ">":
@@ -109,7 +116,7 @@ public class MongoHelper {
                 criteria.lte(condition.getValue());
                 break;
             case "=":
-                criteria.equals(condition.getValue());
+                criteria.is(condition.getValue());
                 break;
             case "!=":
                 criteria.ne(condition.getValue());
@@ -117,6 +124,7 @@ public class MongoHelper {
             default:
                 break;
         }
+        return criteria;
     }
 
     /**

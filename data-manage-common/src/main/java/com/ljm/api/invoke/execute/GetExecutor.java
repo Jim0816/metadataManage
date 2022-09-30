@@ -1,9 +1,9 @@
 package com.ljm.api.invoke.execute;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.ljm.bo.ApiResult;
 import com.ljm.utils.MongoDBUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 
 import java.util.List;
@@ -23,9 +23,9 @@ public class GetExecutor implements ExecuteStrategy{
     }
 
     @Override
-    public JSONObject execute(JSONObject data, ApiResult apiResult) {
+    public Object execute(JSONObject data, ApiResult apiResult) {
         Aggregation aggregation = MongoHelper.createAggregation(apiResult, data);
         List<Map> result = mongoDBUtil.query(aggregation, apiResult.getApi().getModel());
-        return null;
+        return result;
     }
 }

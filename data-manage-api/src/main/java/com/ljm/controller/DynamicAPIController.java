@@ -28,6 +28,11 @@ public class DynamicAPIController extends BaseController{
     private APIParser apiParser;
     private ExecuteContext executeContext;
 
+    @GetMapping(value = "/test")
+    public Result test(){
+        return Result.ok("hello world");
+    }
+
     /**
      * @description 处理add类型接口  apiName是接口名称（唯一），通过接口名称查找接口数据
      * @return http://127.0.0.1:8081/server/put/user/addUser
@@ -106,9 +111,9 @@ public class DynamicAPIController extends BaseController{
         // 3.封装执行
         // data + api -> mongo
         executeContext.setExecuteStrategy(apiResult);
-        int result = executeContext.execute(acceptData, apiResult);
+        Object result = executeContext.execute(acceptData, apiResult);
 
-        return Result.ok();
+        return Result.ok(result);
     }
 
 }
