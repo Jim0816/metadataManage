@@ -40,4 +40,4 @@ logging:
 
 # 用户自定义配置
 custom:
-  apiUrlPattern: "http://127.0.0.1:8081/server/{opType}/{model}/{name}"
+  apiUrlPattern: "http://127.0.0.1:8081/api/{model}/{opType}/{name}"

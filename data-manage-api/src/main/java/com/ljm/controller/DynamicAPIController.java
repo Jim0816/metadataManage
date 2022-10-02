@@ -94,7 +94,7 @@ public class DynamicAPIController extends BaseController{
      * @description get类型接口
      * @return
      * @exception
-     * @author Jim
+     * @author
      * @date 2022/2/25 11:21
      **/
     @PostMapping(value = "/get/{model}/{apiName}")

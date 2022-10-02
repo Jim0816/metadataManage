@@ -17,6 +17,8 @@ public interface ApiService extends IService<Api> {
      **/
     List<Api> listApi(Api api);
 
+    List<Api> listApi();
+
     /**
      * @description 添加api
      * @return

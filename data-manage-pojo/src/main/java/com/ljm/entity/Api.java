@@ -110,4 +110,15 @@ public class Api implements Serializable {
                 .replace("{opType}", this.opType)
                 .replace("{name}", this.name);
     }
+
+    /**
+     * @description 获取相对路径 即url端口后路径
+     * @return
+     * @exception
+     * @author Jim
+     * @date 2022/10/2 下午3:52
+     **/
+    public String getApiPath(){
+        return "/api/" + this.model + "/" + this.opType + "/" + this.name;
+    }
 }

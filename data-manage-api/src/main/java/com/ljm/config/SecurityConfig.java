@@ -59,6 +59,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			"/fieldTree/**",
 			"/model/**",
 			"/api/**",
+			"/test/**",
 			"/server/**"
 	};
 

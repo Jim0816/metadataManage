@@ -36,6 +36,11 @@ public class ApiServiceImpl extends ServiceImpl<ApiMapper, Api> implements ApiSe
     }
 
     @Override
+    public List<Api> listApi() {
+        return apiMapper.selectList(new QueryWrapper<Api>().eq("status",1));
+    }
+
+    @Override
     public boolean save(Api api) {
         // 添加前先校验api是否合法
         if (!checkApi(api)){

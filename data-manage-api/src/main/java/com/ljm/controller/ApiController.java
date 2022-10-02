@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ljm.bo.ApiResult;
+import com.ljm.dynamic.DynamicAPI;
 import com.ljm.entity.Api;
 import com.ljm.enums.ApiLabelEnum;
 import com.ljm.enums.ResCodeEnum;
@@ -16,7 +17,10 @@ import com.ljm.vo.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 
 /**
@@ -39,6 +43,13 @@ public class ApiController extends BaseController {
     @Autowired
     private DynamicApiService dynamicApiService;
 
+    @Autowired
+    private DynamicAPI apiHandler;
+
+    @Autowired
+    private RequestMappingHandlerMapping mapping;
+
+
     /**
      * @description Done 添加接口 (需要优化)
      * @return
@@ -47,7 +58,7 @@ public class ApiController extends BaseController {
      * @date 2022/4/9 16:29
      **/
     @PostMapping(value = "/save")
-    public Result save(@RequestBody String data){
+    public Result save(@RequestBody String data) throws NoSuchMethodException {
         Api api = new Api(data, urlPattern);
         // 1.先判断是否name存在重名
         int count = apiService.count(new QueryWrapper<Api>().eq(ApiLabelEnum.NAME.toString(), api.getName()));
@@ -64,6 +75,19 @@ public class ApiController extends BaseController {
             //ApiResult apiResult = apiParser.parse(api.getId());
             //String value = JSON.toJSONString(apiResult);
             //redisUtil.hset(Const.API_KEY, key, value, 6 * 60); //6小时过期
+
+            // 解析接口结果，存入redis
+
+            // 通过反射生成接口，并注入容器
+            String apiPath = api.getApiPath();
+            RequestMappingInfo info = RequestMappingInfo.paths(apiPath).methods("get".equals(api.getHttpType()) ? RequestMethod.GET : RequestMethod.POST).build();
+
+            // 反射得到方法
+            Method method = DynamicAPI.class.getMethod("handle", String.class);
+
+            // 将方法注册到ioc容器
+            mapping.registerMapping(info, apiHandler, method);
+
             return Result.ok();
         }
         return Result.failed();
