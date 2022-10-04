@@ -20,13 +20,14 @@ request.interceptors.response.use(
 	response => {
 		//console.log("response ->" + response)
 		let res = response.data
-		if (res.code === 200) {
-			return response
-		} else {
-			// 操作失败统一拦截
-			Element.Message.error(!res.data.msg ? '系统异常' : res.data.msg)
-			return Promise.reject(response.data.msg)
-		}
+		// if (res.code === 200) {
+		// 	return response
+		// } else {
+		// 	// 操作失败统一拦截
+		// 	//Element.Message.error(!res.data.msg ? '系统异常' : res.data.msg)
+		// 	return Promise.reject(response.data.msg)
+		// }
+		return response
 	},
 	error => {
 		console.log(error)

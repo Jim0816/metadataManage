@@ -1,5 +1,6 @@
 package com.ljm.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -17,6 +18,7 @@ import com.ljm.utils.QueryUtils;
 import com.ljm.vo.ModelVO;
 import com.ljm.vo.Result;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -29,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-
+@Slf4j
 @AllArgsConstructor
 @RestController
 @RequestMapping("/model")
@@ -39,6 +41,20 @@ public class ModelController extends BaseController{
 
     private FieldNodeService fieldNodeService;
 
+
+    /**
+     * @return
+     * @throws
+     * @description TODO 添加模型 通过模版配置
+     * @author zyt
+     * @date 2022/4/12 9:54
+     **/
+    @PostMapping(value = "/saveByProperties")
+    public Result saveByProperties(@RequestBody String data){
+        JSONObject json = JSONObject.parseObject(data);
+        boolean result = modelService.createModelByProperties(json);
+        return result ? Result.ok() : Result.failed();
+    }
 
     /**
      * @return

@@ -18,3 +18,11 @@ export const remove = (ids) => {
         params: ids
     });
 };
+
+export const saveByProperties = (info) => {
+    return request({
+        url: '/model/saveByProperties',
+        method: 'post',
+        data: info
+    });
+};
