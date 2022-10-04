@@ -38,14 +38,17 @@ public class FieldInfoServiceImpl extends ServiceImpl<FieldInfoMapper, FieldInfo
      * @date 2022/4/16 17:11
      **/
     private boolean judgeFieldIsExist(FieldInfo fieldInfo){
-        // 1.先查询出所以重名字段
+        // 1.先查询出所有重名字段
         List<FieldInfo> list = baseMapper.selectList(new QueryWrapper<FieldInfo>()
                 .eq(FieldLabelEnum.DB_KEY_FIELD_NAME.getValue(), fieldInfo.getFieldName()));
         // 2.记录重复字段
-        String curField = fieldInfo.toString();
         for (FieldInfo field : list){
-            if (field.toString().equals(curField)){
-                // 存在一个相同，就直接返回true
+            // 除了名称，只要存在一项不相同，就认为二者不相同（备注不算）
+            boolean flag = (field.getFieldType() != fieldInfo.getFieldType()) || (field.getLength() != fieldInfo.getLength())
+                    || (field.getIsRequire() != fieldInfo.getIsRequire()) || (field.getIsUnique() != fieldInfo.getIsUnique())
+                    || (field.getDefaultValue() != fieldInfo.getDefaultValue());
+            if (!flag){
+                // 相同，就直接返回true
                 return true;
             }
         }

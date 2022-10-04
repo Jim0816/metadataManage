@@ -107,6 +107,11 @@ public class ModelServiceImpl extends ServiceImpl<ModelMapper, Model> implements
         }
     }
 
+    @Override
+    public boolean createModelByProperties(JSONObject prop) {
+        return false;
+    }
+
     /**
      * @description  创建数据模型 TODO mongoDB的事务正在调研
      * @return

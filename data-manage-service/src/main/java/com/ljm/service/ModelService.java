@@ -1,5 +1,6 @@
 package com.ljm.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ljm.dto.ModelParamDto;
 import com.ljm.entity.Model;
@@ -16,6 +17,15 @@ import java.util.List;
  * @since 2022-02-22
  */
 public interface ModelService extends IService<Model> {
+
+    /**
+     * @description TODO
+     * @return
+     * @exception
+     * @author Jim
+     * @date 2022/10/4 下午2:45
+     **/
+    boolean createModelByProperties(JSONObject prop);
     /**
      * @description  创建数据模型
      * @return
