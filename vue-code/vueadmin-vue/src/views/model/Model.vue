@@ -25,6 +25,10 @@
           <el-button type="danger" slot="reference" :disabled="delBtlStatu" >批量删除</el-button>
         </el-popconfirm>
       </el-form-item>
+      <el-form-item>
+        <!--				<el-button type="primary" @click="dialogVisible = true" v-if="hasAuth('sys:field:save')">新增</el-button>-->
+        <el-button type="success" @click="uploadTemplate" >上传</el-button>
+      </el-form-item>
     </el-form>
 
     <el-table
@@ -114,12 +118,36 @@
         :total="total">
     </el-pagination>
 
+    <!-- 上传模版对话框 -->
+    <el-dialog
+      title="上传模版"
+      :visible.sync="uploadTemplateVisible"
+      width="800px"
+      :before-close="closeUploadTemplate">
+
+      <el-upload
+        drag
+          :limit="1"
+          action="https://jsonplaceholder.typicode.com/posts/"
+          ref="upload"
+          accept=".json"
+          :file-list="fileList"
+          :on-success="onSuccess"
+          :on-remove="onRemove">
+            <i class="el-icon-upload"></i>
+            <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+            <div class="el-upload__tip" slot="tip">上传json文件，且只能上传 1 个文件</div>
+      </el-upload>
+      <el-button type="primary" @click="save">确定</el-button>
+    
+    </el-dialog>
+
     <!--新增对话框-->
     <el-dialog
         title="新增模型"
         :visible.sync="dialogVisible"
         width="600px"
-        :before-close="handleClose">
+        :before-close="closeUploadTemplate">
 
       <el-form :model="editForm" :rules="editFormRules" ref="editForm">
 
@@ -155,8 +183,10 @@
 </template>
 
 <script>
-import { page, remove } from '@/api/model'
+import { page, remove, saveByProperties } from '@/api/model'
 import JsonView from '@/components/JsonView'
+import FileSaver from 'file-saver'
+
 export default {
   name: "Model",
   components: {
@@ -164,6 +194,9 @@ export default {
   },
   data() {
     return {
+      fileList: [],
+      uploadData: {},
+      uploadTemplateVisible: false,
       searchForm: {},
       delBtlStatu: true,
       // 分页数据
@@ -198,6 +231,49 @@ export default {
     this.getModelList()
   },
   methods: {
+    onSuccess(res, file, fileList) {
+      let reader = new FileReader()
+      reader.readAsText(file.raw)
+      reader.onload = ((e) => {
+          this.uploadData = e.target.result
+          //console.log(this.uploadData)
+          //console.log(this.uploadData)
+      })
+    },
+    onRemove(file) {
+      this.fileList = []
+    },
+    save() {
+      //this.$emit('uploadParent', this.uploadData)
+      //console.log()
+      let data = JSON.parse(this.uploadData)
+      console.log(data)
+      saveByProperties(data).then(res => {
+        console.log(res.data)
+        if(res.data.code == 200){
+          this.getModelList();
+          this.$message({
+            showClose: true,
+            message: '操作成功',
+            type: 'success',
+          });
+        }else{
+          this.$message({
+            showClose: true,
+            message: '操作失败',
+            type: 'error',
+          });
+        }
+        this.uploadTemplateVisible = false
+      })
+
+    },
+    uploadTemplate(){
+      this.uploadTemplateVisible = true
+    },
+    closeUploadTemplate(){
+      this.uploadTemplateVisible = false
+    },
     getModelList() {
       this.searchForm['current'] = this.current;
       this.searchForm['size'] = this.size;

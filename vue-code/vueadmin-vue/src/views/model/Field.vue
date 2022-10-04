@@ -53,12 +53,6 @@
       </el-table-column>
 
       <el-table-column
-              prop="fieldName"
-              label="所属模型"
-              min-width="50">
-      </el-table-column>
-
-      <el-table-column
               prop="fieldType"
               label="字段类型"
               width="80">
@@ -158,6 +152,7 @@
             <el-option label="long" value="long"></el-option>
             <el-option label="float" value="float"></el-option>
             <el-option label="array" value="array"></el-option>
+            <el-option label="date" value="date"></el-option>
             <el-option label="complex" value="complex"></el-option>
           </el-select>
         </el-form-item>

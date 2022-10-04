@@ -36,6 +36,7 @@ public class ModelServiceTest {
         modelService.createModelByProperties(jsonObject);
         // 2.JOSNObject提取字段项、字段树、模型
         int count = modelService.count();
+        //modelService.createModelByProperties();
         log.info(String.valueOf(count));
     }
 }
