@@ -36,3 +36,20 @@ export const remove = (ids) => {
         data: ids
     });
 };
+
+// 删除 ids是数组类型
+export const addNode = (node) => {
+    return request({
+        url: '/fieldTree/save',
+        method: 'post',
+        data: node
+    });
+};
+
+export const updateNode = (info) => {
+    return request({
+        url: '/fieldTree/updateNode',
+        method: 'post',
+        data: info
+    });
+};

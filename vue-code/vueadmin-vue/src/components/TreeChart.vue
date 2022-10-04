@@ -93,14 +93,14 @@
         methods: {
             showSeeksGraph(query) {
                 //let data = this.transformTree(this.tree)
-                console.log(this.tree)
+                //console.log(this.tree)
                 this.$refs.seeksRelationGraph.setJsonData(this.tree, (seeksRGGraph) => {
                     // 这些写上当图谱初始化完成后需要执行的代码
                 })
 
                 this.$refs.seeksRelationGraph.setOptions(this.graphOptions, (seeksRGGraph) => {
                     // 这些写上当图谱初始化完成后需要执行的代码
-                    console.log('setOptions:callback:', seeksRGGraph)
+                    //console.log('setOptions:callback:', seeksRGGraph)
                     // seeksRGGraph.refresh()
                 })
 

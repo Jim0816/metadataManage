@@ -24,7 +24,6 @@
       </el-form-item>
     </el-form>
     <div class="center">
-
       <el-card class="box-card" v-for="(tree, index) in treeData" shadow="hover">
         <div slot="header" class="clearfix">
           <span><el-tag style="font-size: 15px;font-weight: bolder;cursor: pointer">{{tree.fieldTreeName}}</el-tag></span>
@@ -66,7 +65,18 @@
             title="新增字段树"
             :visible.sync="addDialogVisible"
             :before-close="handleCloseAdd">
-      <el-dialog
+            <div style="width:100%;height: 130px;overflow-y: auto;" >
+              <el-form :model="addRootForm" ref="addRootForm" :rules="addRootFormRules" label-width="80px">
+                <el-form-item label="树名称" prop="name">
+                  <el-input v-model="addRootForm.name" size="small" autocomplete="off" placeholder="请输入字段树名称（根节点名称）"></el-input>
+                </el-form-item>
+              </el-form>
+              <div slot="footer" class="dialog-footer">
+                <el-button type="primary" style="float:right;margin-right: 10px;" @click="addRootNode('addRootForm')">确 定</el-button>
+                <el-button @click="addDialogVisible=false" style="float:right;margin-right: 20px;">取 消</el-button>
+              </div>
+            </div>
+      <!-- <el-dialog
               width="30%"
               title="添加根节点"
               :visible.sync="addRootDialogVisible"
@@ -82,8 +92,8 @@
             <el-button @click="addRootDialogVisible=false" style="float:right;margin-right: 20px;">取 消</el-button>
           </div>
         </div>
-      </el-dialog>
-      <div style="width:100%;height: 500px;overflow-y: scroll;" >
+      </el-dialog> -->
+      <!-- <div style="width:100%;height: 500px;overflow-y: scroll;" >
         <div style="float: left;width: 100%;height: 500px;overflow: hidden;">
           <el-card class="box-card-1" shadow="hover">
             <div slot="header" class="clearfix">
@@ -112,7 +122,7 @@
           <el-button type="primary" style="float:right;margin-right: 10px;">确 定</el-button>
           <el-button @click="addDialogVisible=false" style="float:right;margin-right: 20px;">取 消</el-button>
         </div>
-      </div>
+      </div> -->
     </el-dialog>
 
     <!-- 添加节点 -->
@@ -132,54 +142,58 @@
             :visible.sync="viewNodeDialog">
       <div style="width:100%;height: 500px;overflow-y: auto;" >
         <div style="float: left;width: 100%">
-          <el-descriptions class="margin-top" title="节点信息" :column="2">
-            <el-descriptions-item label="节点类型"><el-tag size="small">非字段节点</el-tag></el-descriptions-item>
-            <el-descriptions-item label="名称">user_tree</el-descriptions-item>
-            <el-descriptions-item label="字段类型">string</el-descriptions-item>
-            <el-descriptions-item label="字段长度">20</el-descriptions-item>
-            <el-descriptions-item label="必填项">是</el-descriptions-item>
-            <el-descriptions-item label="唯一项">否</el-descriptions-item>
-            <el-descriptions-item label="默认值">无</el-descriptions-item>
-            <el-descriptions-item label="备注">你说你上次u随我</el-descriptions-item>
+          <el-descriptions class="margin-top" title="本节点信息" :column="2">
+            <el-descriptions-item label="节点类型"><el-tag size="small">{{selectNode.nodeType == 1 ? '根节点' : (selectNode.nodeType == 2 ? '中间节点' : '字段节点')}}</el-tag></el-descriptions-item>
+            <el-descriptions-item label="名称">{{selectNode.nodeType == 3 ? selectNode.fieldInfo.fieldName : selectNode.nodeName}}</el-descriptions-item>
+            <el-descriptions-item v-if="selectNode.nodeType == 3" label="字段类型">{{selectNode.fieldInfo.fieldType}}</el-descriptions-item>
+            <el-descriptions-item v-if="selectNode.nodeType == 3" label="字段长度">{{selectNode.fieldInfo.length}}</el-descriptions-item>
+            <el-descriptions-item v-if="selectNode.nodeType == 3" label="是否必填">{{selectNode.fieldInfo.isRequire == 1 ? '是' : '否'}}</el-descriptions-item>
+            <el-descriptions-item v-if="selectNode.nodeType == 3" label="是否唯一">{{selectNode.fieldInfo.isUnique == 1 ? '是' : '否'}}</el-descriptions-item>
+            <el-descriptions-item v-if="selectNode.nodeType == 3" label="默认值">{{selectNode.fieldInfo.defaultValue}}</el-descriptions-item>
+            <el-descriptions-item v-if="selectNode.nodeType == 3" label="备注">{{selectNode.fieldInfo.remark}}</el-descriptions-item>
           </el-descriptions>
         </div>
-        <div style="float: left;margin-top: 20px; width: 100%;height: 50px;">
-          <el-descriptions title="字段修改"></el-descriptions>
-          <el-select v-model="value" filterable placeholder="请输入字段名称" style="width: 100%;height: 100%;">
+        <div v-if="selectNode.nodeType != 1" style="float: left;margin-top: 20px; width: 100%;height: 50px;">
+          <el-descriptions title="修改本节点"></el-descriptions>
+          <el-select v-model="curNodeFieldId" filterable placeholder="请选择本节点字段" style="width: 100%;height: 100%;">
             <el-option
                     v-for="item in options"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value">
-              <span style="float: left">username</span>
-              <span style="float: right; margin-right:5px; color: #8492a6; font-size: 13px">默认值: 无</span>
-              <span style="float: right; margin-right:10px; color: #8492a6; font-size: 13px">唯一: 否</span>
-              <span style="float: right; margin-right:15px; color: #8492a6; font-size: 13px">必须: 是</span>
-              <span style="float: right; margin-right:20px; color: #8492a6; font-size: 13px">长度: 20</span>
-              <span style="float: right; margin-right:25px; color: #8492a6; font-size: 13px">类型: string</span>
+                    :key="item.id"
+                    :label="item.fieldName"
+                    :value="item.id">
+              <span style="float: left">{{item.fieldName}}</span>
+              <span style="float: right; margin-right:5px; color: #8492a6; font-size: 13px">默认值: {{item.defaultvalue == '' ? '无' : item.defaultvalue}}</span>
+              <span style="float: right; margin-right:10px; color: #8492a6; font-size: 13px">唯一: {{item.Unique == 1 ? '是' : '否'}}</span>
+              <span style="float: right; margin-right:15px; color: #8492a6; font-size: 13px">必须: {{item.isRequire == 1 ? '是' : '否'}}</span>
+              <span style="float: right; margin-right:20px; color: #8492a6; font-size: 13px">长度: {{item.length}}</span>
+              <span style="float: right; margin-right:25px; color: #8492a6; font-size: 13px">类型: {{item.fieldType}}</span>
             </el-option>
           </el-select>
         </div>
         <div style="float: left;margin-top: 60px; width: 100%;height: 50px;">
-          <el-descriptions title="子节点"></el-descriptions>
-          <el-select v-model="value" multiple filterable placeholder="请选择子节字段" style="width: 100%;height: 100%;">
+          <el-descriptions title="添加子节点"></el-descriptions>
+          <el-select v-model="childNodeFieldIds" multiple filterable placeholder="请选择子节字段" style="width: 100%;height: 100%;">
             <el-option
                     v-for="item in options"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value">
-              <span style="float: left">username</span>
-              <span style="float: right; margin-right:5px; color: #8492a6; font-size: 13px">默认值: 无</span>
-              <span style="float: right; margin-right:10px; color: #8492a6; font-size: 13px">唯一: 否</span>
-              <span style="float: right; margin-right:15px; color: #8492a6; font-size: 13px">必须: 是</span>
-              <span style="float: right; margin-right:20px; color: #8492a6; font-size: 13px">长度: 20</span>
-              <span style="float: right; margin-right:25px; color: #8492a6; font-size: 13px">类型: string</span>
+                    :key="item.id"
+                    :label="item.fieldName"
+                    :value="item.id">
+              <span style="float: left">{{item.fieldName}}</span>
+              <span style="float: right; margin-right:5px; color: #8492a6; font-size: 13px">默认值: {{item.defaultvalue == '' ? '无' : item.defaultvalue}}</span>
+              <span style="float: right; margin-right:10px; color: #8492a6; font-size: 13px">唯一: {{item.Unique == 1 ? '是' : '否'}}</span>
+              <span style="float: right; margin-right:15px; color: #8492a6; font-size: 13px">必须: {{item.isRequire == 1 ? '是' : '否'}}</span>
+              <span style="float: right; margin-right:20px; color: #8492a6; font-size: 13px">长度: {{item.length}}</span>
+              <span style="float: right; margin-right:25px; color: #8492a6; font-size: 13px">类型: {{item.fieldType}}</span>
             </el-option>
           </el-select>
         </div>
 
         <div slot="footer" class="dialog-footer">
-          <el-button type="primary" style="float:right;margin-top:30px;margin-right: 10px;">提交</el-button>
+          <el-popconfirm @confirm="this.removeNode" title="删除本节点可能会删除其所有字节点，确定删除吗？">
+          <el-button slot="reference" type="danger" style="float:right;margin-top:60px;margin-right: 10px;">删除</el-button>
+          </el-popconfirm>
+          <el-button type="primary" style="float:right;margin-top:60px;margin-right: 10px;" @click="this.submitNode">提交</el-button>
+          
         </div>
       </div>
     </el-dialog>
@@ -191,7 +205,8 @@
 <script>
 import Element from "element-ui"
 import screenfull from "screenfull"
-import { page, remove, list, hasFieldTreeName} from '@/api/fieldTree'
+import { page, remove, list, hasFieldTreeName, addNode, updateNode} from '@/api/fieldTree'
+import { list as fieldList} from '@/api/field'
 import TreeChart from '@/components/TreeChart'
 import JsonView from '@/components/JsonView'
 import {checkNameReg} from '@/utils/common'
@@ -215,39 +230,12 @@ export default {
   },
   data() {
     return {
+      curNodeFieldId: '',
+      childNodeFieldIds: '',
       value: '',
-      options: [{
-        value: '选项1',
-        label: '黄金糕'
-      }, {
-        value: '选项2',
-        label: '双皮奶'
-      }, {
-        value: '选项3',
-        label: '蚵仔煎'
-      }, {
-        value: '选项4',
-        label: '龙须面'
-      }, {
-        value: '选项5',
-        label: '北京烤鸭'
-      },{
-        value: '选项1',
-        label: '黄金糕'
-      }, {
-        value: '选项2',
-        label: '双皮奶'
-      }, {
-        value: '选项3',
-        label: '蚵仔煎'
-      }, {
-        value: '选项4',
-        label: '龙须面'
-      }, {
-        value: '选项5',
-        label: '北京烤鸭'
-      }],
+      options: [],
       viewNodeDialog: false,
+      selectNode: {},
       showAddRootBtn: true,
       addRootForm:{},
       searchForm: {},
@@ -263,7 +251,6 @@ export default {
       },
       viewDialogVisible: false,
       addDialogVisible: false,
-      addRootDialogVisible: false,
       jsonData: {
         user:{
           name: "jim",
@@ -291,9 +278,50 @@ export default {
     }
   },
   created() {
+    this.getDict()
     this.getFieldTreeList()
   },
   methods: {
+    submitNode(){
+      //console.log(this.selectNode.id, this.curNodeFieldId, this.childNodeFieldIds)
+      // nodeId, nodeFieldId, childFieldIds
+      // {"id": 1, "nodeType": 1, "parentId": -1, "fieldInfoId":-1, "defaultName": "root"}
+      
+      let data = {nodeId: this.selectNode.id, nodeFieldId: this.curNodeFieldId === '' || this.curNodeFieldId == '' ? -1 : this.curNodeFieldId, childFieldIds: this.childNodeFieldIds}
+      console.log(data)
+      updateNode(data).then(res => {
+        if (res.data.code == 200){
+          this.getFieldTreeList()
+          this.$message({
+            type: 'success',
+            message: '操作成功!',
+          });
+          this.viewNodeDialog = false
+        }
+      })
+
+    },
+    removeNode(){
+      let ids = []
+      ids.push(this.selectNode.id)
+      console.log(ids)
+      remove(ids).then(res => {
+        if (res.data.code == 200){
+          this.getFieldTreeList()
+          this.$message({
+            type: 'success',
+            message: '删除成功!',
+          });
+          this.viewNodeDialog = false
+        }
+      })
+    },
+    getDict(){
+      fieldList().then(res => {
+          console.log(res.data.data)
+          this.options = res.data.data
+        })
+    },
     // 删除字段树
     removeFieldTree(tree){
       this.$confirm('此操作将永久删除该字段树, 是否继续?', '提示', {
@@ -305,13 +333,14 @@ export default {
         ids.push(Number(tree.rootId))
         console.log(ids)
         remove(ids).then(res => {
-          this.$message({
-            type: 'success',
-            message: '删除成功!',
-            onClose:() => {
-              this.getFieldTreeList()
-            }
-          });
+          console.log(res)
+          if (res.data.code == 200){
+            this.getFieldTreeList()
+            this.$message({
+              type: 'success',
+              message: '删除成功!',
+            });
+          }
         })
       }).catch(() => {
         this.$message({
@@ -322,7 +351,7 @@ export default {
     },
     // 获取子组件tree中的数据
     getTreeMapData(data){
-      console.log(data)
+      this.selectNode = data
       this.viewNodeDialog = true;
     },
     // nodeType: 1根节点 2中间节点 3叶子节点（字段）
@@ -352,16 +381,31 @@ export default {
               Element.Message.warning('字段树名称已经存在')
             }else{
               // 创建根节点
-              this.tree.fieldTreeName = this.addRootForm.name
-              let node = this.buildNode(1, -1, -1, this.addRootForm.name)
-              this.tree.rootId = node.id
-              this.tree.nodes.push(node)
-              this.addRootDialogVisible = false
-              this.treeChangeFlag = !this.treeChangeFlag
+              // {"id": 1, "nodeType": 1, "parentId": -1, "fieldInfoId":-1, "defaultName": "root"}
+              let node = {id: 1, nodeType: 1, parentId: -1, fieldInfoId: -1, defaultName: this.addRootForm.name}
+              let nodeList = []
+              nodeList.push(node)
+              addNode(nodeList).then(res => {
+                //console.log(res)
+                if (res.data.code == 200){
+                  this.getFieldTreeList()
+                  this.$message({
+                    type: 'success',
+                    message: '创建成功!',
+                  });
+                }
+              });
+              // this.tree.fieldTreeName = this.addRootForm.name
+              // let node = this.buildNode(1, -1, -1, this.addRootForm.name)
+              // this.tree.rootId = node.id
+              // this.tree.nodes.push(node)
+              // this.addRootDialogVisible = false
+              // this.treeChangeFlag = !this.treeChangeFlag
             }
           });
         }
       })
+      this.addDialogVisible = false
     },
     toggleFullscreen(index){
       const obj = document.getElementById("field-tree-"+index);

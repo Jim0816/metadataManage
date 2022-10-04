@@ -1,7 +1,7 @@
 import axios from "axios";
 import router from "../router";
 import Element from "element-ui"
-axios.defaults.baseURL = "http://localhost:8081"
+axios.defaults.baseURL = "http://127.0.0.1:8081"
 const request = axios.create({
 	timeout: 5000,
 	headers: {
@@ -18,7 +18,7 @@ request.interceptors.request.use(config => {
 // 响应拦截器即异常处理
 request.interceptors.response.use(
 	response => {
-		console.log("response ->" + response)
+		//console.log("response ->" + response)
 		let res = response.data
 		if (res.code === 200) {
 			return response

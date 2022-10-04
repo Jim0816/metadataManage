@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.ljm.api.invoke.parse.APIParser;
 import com.ljm.bo.ApiResult;
 import com.ljm.dynamic.DynamicAPI;
 import com.ljm.entity.Api;
@@ -39,6 +40,9 @@ public class ApiController extends BaseController {
 
     @Autowired
     private ApiService apiService;
+
+    @Autowired
+    private APIParser apiParser;
 
     @Autowired
     private DynamicApiService dynamicApiService;
@@ -77,6 +81,7 @@ public class ApiController extends BaseController {
             //redisUtil.hset(Const.API_KEY, key, value, 6 * 60); //6小时过期
 
             // 解析接口结果，存入redis
+            ApiResult apiResult = apiParser.parse(api.getName());
 
             // 通过反射生成接口，并注入容器
             String apiPath = api.getApiPath();

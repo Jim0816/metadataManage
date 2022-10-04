@@ -85,7 +85,7 @@ router.beforeEach((to, from, next) => {
 			}
 		}).then(res => {
 
-			console.log(res.data.data)
+			//console.log(res.data.data)
 
 			// 拿到menuList
 			store.commit("setMenuList", res.data.data.nav)
@@ -93,7 +93,7 @@ router.beforeEach((to, from, next) => {
 			// 拿到用户权限
 			store.commit("setPermList", res.data.data.authoritys)
 
-			console.log(store.state.menus.menuList)
+			//console.log(store.state.menus.menuList)
 
 			// 动态绑定路由
 			let newRoutes = router.options.routes
@@ -114,8 +114,8 @@ router.beforeEach((to, from, next) => {
 				}
 			})
 
-			console.log("newRoutes")
-			console.log(newRoutes)
+			//console.log("newRoutes")
+			//console.log(newRoutes)
 			router.addRoutes(newRoutes)
 
 			hasRoute = true
@@ -145,7 +145,7 @@ const menuToRoute = (menu) => {
 		}
 	}
 	route.component = () => import('@/views/' + menu.component +'.vue')
-	console.log(route)
+	//console.log(route)
 	return route
 }
 

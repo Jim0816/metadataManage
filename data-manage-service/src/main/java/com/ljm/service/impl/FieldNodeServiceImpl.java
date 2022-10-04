@@ -217,7 +217,7 @@ public class FieldNodeServiceImpl extends ServiceImpl<FieldNodeMapper, FieldNode
             FieldNode fd =fieldNodeMapper.selectOne(wrapperRoot);
             int f = fieldNodeMapper.selectCount(wrapperRoot);
             //判断是否传入的是根节点
-            if (fd.getNodeType() != fd.NODE_TYPE_ROOT || f == 0){
+            if (f == 0){
                 return false;
             }
 

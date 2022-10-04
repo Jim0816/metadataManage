@@ -48,7 +48,7 @@ export const get = (item) => {
 export const list = (query) => {
     return request({
         url: '/field/list',
-        method: 'post',
+        method: 'get',
         data: query
     });
 };

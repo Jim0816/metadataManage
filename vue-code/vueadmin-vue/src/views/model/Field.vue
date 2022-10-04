@@ -158,6 +158,7 @@
             <el-option label="long" value="long"></el-option>
             <el-option label="float" value="float"></el-option>
             <el-option label="array" value="array"></el-option>
+            <el-option label="complex" value="complex"></el-option>
           </el-select>
         </el-form-item>
 

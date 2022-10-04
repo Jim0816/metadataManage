@@ -292,7 +292,7 @@ export default {
         console.log(res.data.data)
         this.$message({
           showClose: true,
-          message: '恭喜你，操作成功',
+          message: '操作成功',
           type: 'success',
           onClose:() => {
             this.getModelList()
