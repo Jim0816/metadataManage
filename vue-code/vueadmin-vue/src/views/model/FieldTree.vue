@@ -318,7 +318,7 @@ export default {
     },
     getDict(){
       fieldList().then(res => {
-          console.log(res.data.data)
+          //console.log(res.data.data)
           this.options = res.data.data
         })
     },
@@ -511,6 +511,7 @@ export default {
           treeList.push(this.transformTree(res.data.data.records[i]))
         }
         this.treeData = treeList
+        console.log(this.treeData)
         this.size = res.data.data.size
         this.current = res.data.data.current
         this.total = res.data.data.total

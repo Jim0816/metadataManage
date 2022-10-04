@@ -3,7 +3,7 @@ import router from "../router";
 import Element from "element-ui"
 axios.defaults.baseURL = "http://127.0.0.1:8081"
 const request = axios.create({
-	timeout: 5000,
+	timeout: 10000,
 	headers: {
 		'Content-Type': "application/json; charset=utf-8"
 	}

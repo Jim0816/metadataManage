@@ -502,11 +502,12 @@ public class ModelServiceImpl extends ServiceImpl<ModelMapper, Model> implements
     public boolean removeModel(Long[] ids) {
         List<Model> models = this.listByIds(Arrays.asList(ids));
         for(Model model : models){
-            model.setIsDelete(Model.MODEL_DELETE);
+            //model.setIsDelete(Model.MODEL_DELETE);
+            modelMapper.deleteById(model);
         }
-        if(!this.updateBatchById(models))
-          throw new CustomException(ResCodeEnum.MODEL_DELETE_ERROR);
-        log.info("删除模型成功"+ids);
+//        if(!this.updateBatchById(models))
+//          throw new CustomException(ResCodeEnum.MODEL_DELETE_ERROR);
+//        log.info("删除模型成功"+ids);
         return true;
     }
 

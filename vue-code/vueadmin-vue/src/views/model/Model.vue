@@ -365,15 +365,15 @@ export default {
       console.log(ids)
 
       remove(ids).then(res => {
-        console.log(res.data.data)
-        this.$message({
-          showClose: true,
-          message: '操作成功',
-          type: 'success',
-          onClose:() => {
-            this.getModelList()
-          }
-        });
+        if (res.data.code == 200){
+          this.getModelList()
+          this.$message({
+            showClose: true,
+            message: '操作成功',
+            type: 'success',
+          });
+        }
+        
       })
     },
     handleChange(){}

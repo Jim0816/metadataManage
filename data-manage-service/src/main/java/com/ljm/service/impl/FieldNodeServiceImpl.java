@@ -8,6 +8,8 @@ import com.ljm.entity.FieldNode;
 import com.ljm.entity.Model;
 import com.ljm.enums.FieldLabelEnum;
 import com.ljm.enums.FieldNodeLabelEnum;
+import com.ljm.enums.ResCodeEnum;
+import com.ljm.except.CustomException;
 import com.ljm.mapper.FieldInfoMapper;
 import com.ljm.mapper.FieldNodeMapper;
 import com.ljm.mapper.ModelMapper;
@@ -225,7 +227,7 @@ public class FieldNodeServiceImpl extends ServiceImpl<FieldNodeMapper, FieldNode
             QueryWrapper<Model> wrapperModel = new QueryWrapper<>();
             int model = modelMapper.selectCount(wrapperModel.eq("field_tree_id",id));
             if(model != 0){
-                return false;
+                throw new CustomException(ResCodeEnum.MODEL_DELETE_ERROR);
             };
 
             queue.offer(fd);//将根节点进入队列

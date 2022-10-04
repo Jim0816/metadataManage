@@ -15,7 +15,7 @@ export const remove = (ids) => {
     return request({
         url: '/model/remove',
         method: 'post',
-        params: ids
+        data: ids
     });
 };
 
