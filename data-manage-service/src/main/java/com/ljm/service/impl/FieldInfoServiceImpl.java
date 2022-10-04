@@ -37,7 +37,7 @@ public class FieldInfoServiceImpl extends ServiceImpl<FieldInfoMapper, FieldInfo
      * @author Jim
      * @date 2022/4/16 17:11
      **/
-    private boolean judgeFieldIsExist(FieldInfo fieldInfo){
+    public boolean judgeFieldIsExist(FieldInfo fieldInfo){
         // 1.先查询出所有重名字段
         List<FieldInfo> list = baseMapper.selectList(new QueryWrapper<FieldInfo>()
                 .eq(FieldLabelEnum.DB_KEY_FIELD_NAME.getValue(), fieldInfo.getFieldName()));

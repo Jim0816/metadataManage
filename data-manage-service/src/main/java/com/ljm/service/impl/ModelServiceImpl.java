@@ -11,20 +11,24 @@ import com.ljm.bo.FieldNodeTree;
 import com.ljm.bo.mongo.Index;
 import com.ljm.bo.mongo.QueryModel;
 import com.ljm.dto.ModelParamDto;
+import com.ljm.entity.FieldInfo;
 import com.ljm.entity.FieldNode;
 import com.ljm.entity.Model;
 import com.ljm.enums.FieldLabelEnum;
 import com.ljm.enums.FieldNodeLabelEnum;
 import com.ljm.enums.ModelLabelEnum;
 import com.ljm.enums.ResCodeEnum;
+import com.ljm.enums.table.ModelEnum;
 import com.ljm.except.CustomException;
 import com.ljm.mapper.FieldNodeMapper;
 import com.ljm.mapper.ModelMapper;
+import com.ljm.service.FieldInfoService;
 import com.ljm.service.FieldNodeService;
 import com.ljm.service.ModelService;
 import com.ljm.bo.ModelDetail;
 import com.ljm.vo.FieldTreeVO;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,6 +53,12 @@ public class ModelServiceImpl extends ServiceImpl<ModelMapper, Model> implements
     private FieldNodeService fieldNodeService; // 注意: service层之间不要循环调用
 
     private MongoDBUtil mongoDBUtil;
+
+    @Autowired
+    private FieldInfoService fieldInfoService;
+
+    @Autowired
+    private FieldInfoServiceImpl fieldInfoServiceImpl;
 
     /**
      * @param fields        所有字段结构信息列表
@@ -107,9 +117,114 @@ public class ModelServiceImpl extends ServiceImpl<ModelMapper, Model> implements
         }
     }
 
+    /**
+     * @description TODO 通过配置文件创建模型
+     * @return boolean
+     * @exception
+     * @author Gcy
+     * @date 2022/10/4 15:46
+     **/
     @Override
+    @Transactional
     public boolean createModelByProperties(JSONObject prop) {
-        return false;
+
+        if (prop.isEmpty()){
+            return false;
+        }
+
+        //1、解析JSON
+
+        Map<String,Object> map = JSON.parseObject(prop.toJSONString());
+        Model model = new Model();
+        for (String key : map.keySet()){
+
+            if (key.equals(ModelEnum.Model_name.getValue())){
+               model.setModelName((String) map.get(key));
+            }
+            if (key.equals(ModelEnum.Model_remark.getValue())){
+                model.setRemark((String) map.get(key));
+            }
+            if (key.equals(ModelEnum.Model_properties.getValue())){//获取模型字段
+                Object o = map.get(key);
+                JSONObject FieldJSON = (JSONObject) o;
+                Map<String,Object> FieldMap = JSON.parseObject(FieldJSON.toJSONString());
+                FieldNode fieldNode = new FieldNode();
+                fieldNode.setNodeType(1);
+                fieldNode.setParentId((long) -1);
+                fieldNode.setFieldInfoId((long) -1);
+                fieldNode.setDefaultName((String) map.get(ModelEnum.Model_name.getValue()));
+                //2、创建fieldNode
+
+                fieldNodeService.save(fieldNode);
+                //3、创建filedNodeTree
+                createField(FieldMap,fieldNode.getId());
+                model.setFieldTreeId(fieldNode.getId());
+            }
+        }
+        model.setIsDelete(0);
+        model.setIndex("{'type': 'single_key', 'field': 'name', 'sort': 1}");
+        //4、创建模型
+        if (model.getFieldTreeId()==null){
+            return false;
+        }
+        int insert = modelMapper.insert(model);
+
+        return  insert > 0 ;
+    }
+    /**
+     * @description TODO 递归遍历模型字段，遇到children时递归
+     * @return
+     * @exception
+     * @author Gcy
+     * @date 2022/10/4 16:15
+     **/
+    public void createField(Map<String,Object> map,long id){
+
+        for (String key:map.keySet()){
+            FieldInfo fieldInfo = new FieldInfo();
+            fieldInfo.setFieldName(key);
+            JSONObject jsonObject = (JSONObject) map.get(key);
+            Map<String,Object> FieldMap = JSON.parseObject(jsonObject.toJSONString());
+
+            for (String k:FieldMap.keySet()){
+                if (k.equals(ModelEnum.Field_type.getValue())){
+                    fieldInfo.setFieldType((String) FieldMap.get(k));
+                }
+                if (k.equals(ModelEnum.Field_required.getValue())){
+                    fieldInfo.setIsRequire((boolean) FieldMap.get(k)?1:0);
+                }
+                if (k.equals(ModelEnum.Field_remark.getValue())){
+                    fieldInfo.setRemark((String) FieldMap.get(k));
+                }
+                if (k.equals(ModelEnum.Field_default_value.getValue())){
+                    fieldInfo.setDefaultValue((String) FieldMap.get(k));
+                }
+                if (k.equals(ModelEnum.Field_length.getValue())){
+                    fieldInfo.setLength((int) FieldMap.get(k));
+                }
+                if (k.equals(ModelEnum.Field_unique.getValue())){
+                    fieldInfo.setIsUnique((boolean) FieldMap.get(k)?1:0);
+                }
+
+            }
+            //判断字段是否存在
+            boolean b = fieldInfoServiceImpl.judgeFieldIsExist(fieldInfo);
+            FieldInfo fieldInfo1 = new FieldInfo();
+            if (b){//存在
+                fieldInfo1 = fieldInfoService.get(fieldInfo);
+            }
+            fieldInfoService.save(fieldInfo);
+            FieldNode fieldNode = new FieldNode();
+            fieldNode.setFieldInfoId(b?fieldInfo1.getId():fieldInfo.getId());
+            fieldNode.setParentId(id);
+            fieldNode.setNodeType(FieldMap.containsKey(ModelEnum.Field_children.getValue()) ? 2:3);
+            fieldNodeService.save(fieldNode);
+            if (FieldMap.containsKey(ModelEnum.Field_children.getValue())){//递归孩子
+                JSONObject json = (JSONObject) map.get(ModelEnum.Field_children.getValue());
+                Map<String,Object> map1 = JSON.parseObject(json.toJSONString());
+                createField(map1,fieldNode.getId());
+            }
+        }
     }
 
     /**
