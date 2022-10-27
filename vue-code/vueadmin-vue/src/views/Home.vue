@@ -6,7 +6,7 @@
 
 		</el-aside>
 		<el-container>
-			<el-header>
+			<el-header style="background-color: #5a9cf8;">
 				<strong>HEPS数据管理系统</strong>
 
 				<div class="header-avatar">

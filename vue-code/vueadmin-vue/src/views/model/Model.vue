@@ -17,7 +17,7 @@
 
       <el-form-item>
         <!--				<el-button type="primary" @click="dialogVisible = true" v-if="hasAuth('sys:field:save')">新增</el-button>-->
-        <el-button type="primary" @click="dialogVisible = true" >新增</el-button>
+        <el-button type="primary" @click="dialogVisible = true" >创建模型</el-button>
       </el-form-item>
       <el-form-item>
         <el-popconfirm title="这是确定批量删除吗？" @confirm="delHandle(null)">
@@ -27,7 +27,7 @@
       </el-form-item>
       <el-form-item>
         <!--				<el-button type="primary" @click="dialogVisible = true" v-if="hasAuth('sys:field:save')">新增</el-button>-->
-        <el-button type="success" @click="uploadTemplate" >上传</el-button>
+        <el-button type="success" @click="uploadTemplate" >导入模型</el-button>
       </el-form-item>
     </el-form>
 
